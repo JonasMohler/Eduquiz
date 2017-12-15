@@ -18,7 +18,7 @@ public class Quiz {
     String QuizName;
     ArrayList<Player> playerList = new ArrayList<Player>();
     ArrayList<Question> questionList = new ArrayList<Question>();
-    public static Integer currentQuestion = 0;
+    public Integer currentQuestion = 0;
     public Integer gameCode;
     Set<String> questionStringSet = new HashSet<String>();
 

@@ -3,6 +3,8 @@ package ch.ethz.inf.vs.quizio;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 
 public class ModeratorResultActivity extends AppCompatActivity {
@@ -14,6 +16,13 @@ public class ModeratorResultActivity extends AppCompatActivity {
 
 
         //TODO: Current Question laden
+
+        final Button button = findViewById(R.id.nextbutton);
+        button.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                //TODO Call startNextQuestion in ServerService
+            }
+        });
 
         Question question = null;
         Quiz quiz = null;

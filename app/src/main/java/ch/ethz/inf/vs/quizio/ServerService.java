@@ -51,6 +51,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.ServerSocket;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import fi.iki.elonen.NanoHTTPD;
 
@@ -171,6 +173,29 @@ public class ServerService extends Service {
             System.out.println("\nRunning! Point your browsers to http://localhost:8080/ \n");
         }
 
+        public void startNextQuestion() {
+
+            int timeForThisQuestion = 10;
+
+            hasQuestionStarted = true;
+            Intent intent = new Intent(getApplicationContext(), ModeratorQuestionActivity.class);
+            startActivity(intent);
+
+
+            new Timer().schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    numAnswersSubmitted = 0;
+                    hasQuestionStarted = false;
+                    questionNumber += 1;
+                    quiz.currentQuestion += 1;
+                    Intent intent = new Intent(getApplicationContext(), ModeratorResultActivity.class);
+                    startActivity(intent);
+                    prefsEditor.putInt("currentQuestion",questionNumber);
+                }
+            }, timeForThisQuestion*1000);
+        }
+
         @Override
         public Response serve(IHTTPSession session) {
             quiz.createQuestionSet();
@@ -244,9 +269,7 @@ public class ServerService extends Service {
                 return new Response("JoinSucceeded");
 
             } else if (parms.containsKey("startQuestion")) {
-                hasQuestionStarted = true;
-                Intent intent = new Intent(getApplicationContext(), ModeratorQuestionActivity.class);
-                startActivity(intent);
+                startNextQuestion();
                 return new Response("QuestionStarted");
 
             } else if (parms.containsKey("isQuestionStarted")) {
@@ -266,7 +289,7 @@ public class ServerService extends Service {
                     questionNumber += 1;
                     Intent intent = new Intent(getApplicationContext(), ModeratorResultActivity.class);
                     startActivity(intent);
-                    prefsEditor.putInt("currentQuestion",Quiz.currentQuestion);
+                    prefsEditor.putInt("currentQuestion",questionNumber);
                 }
                 if (questionNumber == numQuestions) {
                     //start ScoreBoardActivity
