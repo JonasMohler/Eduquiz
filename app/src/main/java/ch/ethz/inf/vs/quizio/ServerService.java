@@ -22,6 +22,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Binder;
 import android.os.Looper;
 import android.os.UserHandle;
 import android.support.annotation.NonNull;
@@ -65,6 +66,8 @@ public class ServerService extends Service {
     RegistrationListener mRegistrationListener;
     String mServiceName;
     NsdManager mNsdManager;
+
+
 
     public ServerService() {
 
@@ -182,7 +185,7 @@ public class ServerService extends Service {
 
         public void startNextQuestion() {
 
-            int timeForThisQuestion = 10;
+            int timeForThisQuestion = 10; //in seconds
 
             hasQuestionStarted = true;
             Intent intent = new Intent(getApplicationContext(), ModeratorQuestionActivity.class);
@@ -201,8 +204,10 @@ public class ServerService extends Service {
                         Intent intent = new Intent(getApplicationContext(), ModeratorScoreboardActivity.class);
                         startActivity(intent);
                     }
-                    Intent intent = new Intent(getApplicationContext(), ModeratorResultActivity.class);
-                    startActivity(intent);
+                    else {
+                        Intent intent = new Intent(getApplicationContext(), ModeratorResultActivity.class);
+                        startActivity(intent);
+                    }
                     prefsEditor.putInt("currentQuestion",questionNumber);
                 }
             }, timeForThisQuestion*1000);

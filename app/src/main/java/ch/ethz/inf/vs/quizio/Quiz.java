@@ -125,7 +125,7 @@ public class Quiz {
     public String getAllPlayerNamesString () {
         String result = "";
         Integer n = playerList.size();
-        for(Integer i = 0;i<=n;i++){
+        for(Integer i = 0;i<n;i++){
             result = result + playerList.get(i).name
                     +  System.lineSeparator();
         }
@@ -142,7 +142,7 @@ public class Quiz {
         this.sortPlayers();
         String result = "";
         Integer n = playerList.size();
-        for(Integer i = 0;i<=n;i++){
+        for(Integer i = 0;i<n;i++){
             result = result + i.toString() + ". "  + playerList.get(i).name
                     +  " with " + playerList.get(i).getScore() + " Points" +  System.lineSeparator();
         }
