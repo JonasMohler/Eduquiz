@@ -1,5 +1,6 @@
 package ch.ethz.inf.vs.quizio;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
@@ -47,7 +48,8 @@ public class ModeratorActivity extends AppCompatActivity {
         final Button button = findViewById(R.id.startQuiz);
         button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                //TODO Call startNextQuestion in ServerService
+                Intent intent = new Intent(getApplicationContext(), ModeratorQuestionActivity.class);
+                startActivity(intent);
             }
         });
 
