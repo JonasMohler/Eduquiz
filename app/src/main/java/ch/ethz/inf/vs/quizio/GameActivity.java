@@ -1,6 +1,7 @@
 package ch.ethz.inf.vs.quizio;
 
 import android.app.Service;
+import android.content.Intent;
 import android.net.nsd.NsdManager;
 import android.net.nsd.NsdServiceInfo;
 import android.net.wifi.WifiManager;
@@ -40,10 +41,7 @@ public class GameActivity
 
         if (client == null) {
 
-            //TODO: what do we really need a wifiManager for in the client?
-            WifiManager wm = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
-
-            client = new QuizClient(wm, this);
+            client = new QuizClient(this);
             client.start();
 
             getSupportFragmentManager().beginTransaction()
@@ -100,15 +98,11 @@ public class GameActivity
                 .commit();
     }
 
-    /*TODO: Do we want to do that?
-    @Override public void onGameEnded(){
-        //load fragment containing scoreboard and a button to return to home menu
+
+    @Override public void goHome(){
+        Intent intent = new Intent(this,MainActivity.class);
+        startActivity(intent);
     }
-
-
-
-    */
-
 
 
 
@@ -116,8 +110,8 @@ public class GameActivity
     @Override public void onJoin(String user, String code) { client.joinQuiz(mServerHost,mServerPort,user, code); }
 
     // Gets called when time is up (in QuestionFragment)
-    @Override public void submitAnswer(QuestionFragment.Answer ans,int correctAns) {
-        client.submitAnswer(ans,correctAns,points);
+    @Override public void submitAnswer(QuestionFragment.Answer ans,int correctAns, int timeRemaining) {
+        client.submitAnswer(ans,correctAns,timeRemaining);
 
     }
 
@@ -196,7 +190,14 @@ public class GameActivity
                     mServerHost = mService.getHost();
                 //moderator lost connection and now we want to reconnect
                 }else{
-                    client.tryReconnect(mServerHost,mServerPort);
+                   while(!client.tryReconnect(mServerHost,mServerPort)){
+                       try {
+                           client.sleep(2000);
+                       }catch (InterruptedException e){
+                            Log.d(TAG,"interrupted on trying to reconnect");
+                            e.printStackTrace();
+                       }
+                   };
                 }
             }
         };

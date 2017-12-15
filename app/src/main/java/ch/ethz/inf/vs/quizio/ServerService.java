@@ -219,7 +219,7 @@ public class ServerService extends Service {
             Map<String, String> parms = session.getParms();
 
             if (CreateQuizActivity.getQuizResume()) {
-                //TODO JONAS: send us Quiz
+
                 if (parms.containsKey("resume")) {
                     numRejoinedPlayers += 1;
                     String oldQuiz = parms.get("resume");
@@ -237,22 +237,32 @@ public class ServerService extends Service {
 
                 }
             } else if (parms.containsKey("join")) {
-                numPlayers += 1;
-                String json = mPrefs.getString("quiz", "");
-                Quiz quiz = gson.fromJson(json, Quiz.class);
-                quiz.PlayerJoins(new Player(parms.get("join")));
-                String quizUpdated = gson.toJson(quiz);
-                prefsEditor.putString("quiz", quizUpdated);
-                prefsEditor.commit();
+                //TODO Peter/Valentin: Client needs to check if name is already taken or not and if code is valid
+                //TODO also server should send a message on failed join so client knows why it failed
+                //hier mein vorschlag...
+                if(false /*name schon benutzt*/){
+                    return new Response("<JoinFailed><Choose a different name>");
+                }else if(false /*code stimmt nicht */){
+                    return new Response("<JoinFailed><Invalid Code>");
+                }else {
 
-                return new Response("JoinSucceeded");
 
+                    numPlayers += 1;
+                    String json = mPrefs.getString("quiz", "");
+                    Quiz quiz = gson.fromJson(json, Quiz.class);
+                    quiz.PlayerJoins(new Player(parms.get("join")));
+                    String quizUpdated = gson.toJson(quiz);
+                    prefsEditor.putString("quiz", quizUpdated);
+                    prefsEditor.commit();
+
+                    return new Response("<JoinSucceeded>");
+                }
 
             } else if (parms.containsKey("startQuestion")) {
 
                 String jsonQuiz = mPrefs.getString("quiz", "");
                 startNextQuestion();
-                return new Response("QuestionStarted" + jsonQuiz);
+                return new Response("<QuestionStarted>" + jsonQuiz);
 
             } else if (parms.containsKey("isQuestionStarted")) {
                 if (hasQuestionStarted) {
@@ -262,6 +272,15 @@ public class ServerService extends Service {
             } else if (parms.containsKey("submitAnswer")) {
                 //TODO JONAS: send Player, Answer and Timestamp
                 //TODO JONAS calcualte points and update Player
+
+                /*
+                * Implemented point calculation in client
+                * Now server gets a player with an updated score
+                * server just needs to update rank and send player back
+                * then you also don't need a timestamp here
+                * player contains a clock now(whatever you want to do with that)
+                * */
+
                 numAnswersSubmitted += 1;
                 if (numAnswersSubmitted == numPlayers) {
                     numAnswersSubmitted = 0;
@@ -276,9 +295,8 @@ public class ServerService extends Service {
                     startActivity(intent);
                 }
                 //TODO return "AnswerReceived" + Player (has points and ranking)
-                //client expects <AnswerReceived><ranking> where ranking is a JSONObject
-                // ranking{"points":points , "rank":rank"} (both ints)
-                return new Response("AnswerReceived");
+
+                return new Response("<AnswerReceived>");
             }
 
             return new Response(null);

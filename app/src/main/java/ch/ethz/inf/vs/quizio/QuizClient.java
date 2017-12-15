@@ -1,5 +1,6 @@
 package ch.ethz.inf.vs.quizio;
 
+import android.content.Intent;
 import android.net.wifi.WifiManager;
 import android.nfc.Tag;
 import android.util.Base64;
@@ -36,27 +37,24 @@ public class QuizClient extends Thread {
         void onStartQuestion(Question question);
         void onResult(boolean correct, int points, int rank);
         void discover();
+        void goHome();
     }
 
     private Lock lock;
     private boolean kill;
-    private WifiManager wifiManager;
     private Listener listener;
     private int points;
     private InetAddress host;
     private int port;
-    private List<Question> questions;
     private int NrQuestions;
-    private Socket socket;
     private int rank;
     private boolean joined = false;
     private int currentQuestion = 0;
-    private JSONObject JsonQuiz;
+    private Quiz quiz;
+    private Player player;
 
 
-    QuizClient(WifiManager wifiManager, Listener listener) {
-        //TODO: let client accept host and port instead of wifimanager
-        this.wifiManager = wifiManager;
+    QuizClient(Listener listener) {
         this.listener = listener;
         lock = new ReentrantLock();
     }
@@ -87,8 +85,20 @@ public class QuizClient extends Thread {
         // After joining, we should now have the quiz
         // start the game loop
 
-        for(int i = 0;i<NrQuestions;i++){
-            //while server doesnt give us the go for next question sleep
+        while(!pollNextQuestion()){
+            try {
+                sleep(2000);
+            }catch (InterruptedException e){
+                Log.d(TAG,"interrupted while polling server for go on  quiz");
+                e.printStackTrace();
+            }
+        }
+
+        NrQuestions = quiz.questionList.size();
+        currentQuestion++;
+        listener.onStartQuestion(quiz.getQuestion(0));
+        for(int i = 1;i<NrQuestions;i++){
+
             while(!pollNextQuestion()){
                 try {
                     sleep(2000);
@@ -99,7 +109,7 @@ public class QuizClient extends Thread {
             }
             //as soon as we have the go, inform the listener to start the next question
             currentQuestion++;
-            listener.onStartQuestion(questions.get(i));
+            listener.onStartQuestion(quiz.questionList.get(i));
 
         }
 
@@ -154,18 +164,9 @@ public class QuizClient extends Thread {
                 }
             //Success
             }else if(status.equals("JoinSuccessful")) {
-                //extract JsonObject to get number of questions and actual questions
-                JsonQuiz = (JSONObject) new JSONTokener(st.nextToken()).nextValue();
-                NrQuestions = JsonQuiz.getInt("QuestionCount");
-                JSONObject JsonQuestions = JsonQuiz.getJSONObject("Questions");
-                JSONObject question;
-                for(int i = 0;i<NrQuestions;i++){
-                    question = JsonQuestions.getJSONObject("q"+i);
-
-                    questions.add(i,new Question(question.getString("theQuestion"),question.getString("answer1"),question.getString("answer2"),question.getString("answer3"),question.getString("answer4"),question.getInt("CorrectAnswer")));
-                }
 
                 //go forward in game
+                player = new Player(name);
                 joined = true;
                 listener.onJoinResult(true,null);
             //Unexpected response
@@ -184,7 +185,7 @@ public class QuizClient extends Thread {
 
     }
 
-    void submitAnswer(QuestionFragment.Answer ans,int CorrectAns, int oldPoints) {
+    void submitAnswer(QuestionFragment.Answer ans,int CorrectAns, int timeRemaining) {
 
 
 
@@ -216,7 +217,17 @@ public class QuizClient extends Thread {
             URL url = new URL("http://"+host+":"+port+"/");
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+            PrintWriter pw = new PrintWriter(connection.getOutputStream(),true);
             connection.setRequestMethod("submitAnswer");
+
+            if(right){
+                points = points + 10 * timeRemaining;
+                player.setScore(points);
+            }
+            String Player = new Gson().toJson(player, ch.ethz.inf.vs.quizio.Player.class);
+            pw.print(Player);
+
+
 
             StringBuilder sb = new StringBuilder();
             String line = "";
@@ -230,10 +241,9 @@ public class QuizClient extends Thread {
             //expected response
             if(st.nextToken().equals("AnswerReceived")){
 
-                //read out values
-                JSONObject JsonRank = (JSONObject) new JSONTokener(st.nextToken()).nextValue();
-                points = JsonRank.getInt("points");
-                rank = JsonRank.getInt("rank");
+                player = new Gson().fromJson(st.nextToken(),Player.class);
+                points = player.getScore();
+                rank = player.getRank();
 
                 //forward to game activity
                 listener.onResult(right,points,rank);
@@ -248,6 +258,12 @@ public class QuizClient extends Thread {
             e.printStackTrace();
         }
 
+        try{
+            sleep(10000);
+        }catch (InterruptedException e){
+            Log.d(TAG, "End of Game: Interrupted on waiting to go to main activity");
+        }
+        listener.goHome();
 
     }
 
@@ -261,14 +277,12 @@ public class QuizClient extends Thread {
         interrupt();
     }
 
-
-
     private boolean pollNextQuestion(){
 
         try {
             URL url = new URL("http://"+host+":"+port+"/");
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
             connection.setRequestMethod("isQuestionStarted");
             StringBuilder sb = new StringBuilder();
             String line = "";
@@ -282,6 +296,7 @@ public class QuizClient extends Thread {
 
             if(st.nextToken().equals("true")){
                 //go for next question
+                quiz = new Gson().fromJson(st.nextToken(), Quiz.class);
                 return true;
             }else{
                 //wait
@@ -297,7 +312,7 @@ public class QuizClient extends Thread {
         return false;
     }
 
-    public void tryReconnect(InetAddress host,int port){
+    public boolean tryReconnect(InetAddress host,int port){
         this.host = host;
         this.port = port;
 
@@ -305,11 +320,10 @@ public class QuizClient extends Thread {
             URL url = new URL("http://"+host+":"+port+"/");
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+            PrintWriter pw = new PrintWriter(connection.getOutputStream(),true);
             connection.setRequestMethod("resume");
-            //TODO:
-            // if quiz doesnt need to be sent do this in a poll like style until server responds with
-            // <ResumeSucceeded><CurrentQuestion>
-            //
+            String Quiz = new Gson().toJson(quiz, ch.ethz.inf.vs.quizio.Quiz.class);
+            pw.print(Quiz);
             StringBuilder sb = new StringBuilder();
             String line = "";
             while ((line = in.readLine())!= null){
@@ -321,8 +335,10 @@ public class QuizClient extends Thread {
             if(st.nextToken().equals("ResumeSucceeded")){
                 //server accepted quiz
                 startFromIthQuestion(Integer.valueOf(st.nextToken()));
+                return true;
             }else{
                 Log.d(TAG,"reconnect failed");
+                return false;
             }
 
 
@@ -334,7 +350,7 @@ public class QuizClient extends Thread {
             e.printStackTrace();
         }
 
-
+    return false;
     }
 
 
@@ -351,14 +367,15 @@ public class QuizClient extends Thread {
             }
             //as soon as we have the go, inform the listener to start the next question
             currentQuestion++;
-            listener.onStartQuestion(questions.get(i));
+            listener.onStartQuestion(quiz.questionList.get(i));
         }
 
-        //at this point we should be through all questions
-        //we now ask the server for the complete scoreboard
-        //TODO: What to do? Go back to mainActivity?
-
-
+        try{
+            sleep(10000);
+        }catch (InterruptedException e){
+            Log.d(TAG, "startFromIthQuestion: Interrupted on waiting to go to main activity");
+        }
+        listener.goHome();
 
     }
 

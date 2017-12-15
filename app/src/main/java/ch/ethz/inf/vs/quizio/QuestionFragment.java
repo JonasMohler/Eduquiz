@@ -22,11 +22,13 @@ public class QuestionFragment extends Fragment {
     private static final String KEY_ANSWER4 = "ans4";
     private static final String KEY_CORRECT = "corrAns";
 
-    public interface Listener { void submitAnswer(Answer ans,int correctAns); }
+    public interface Listener { void submitAnswer(Answer ans,int correctAns, int timeRemaining); }
     public enum Answer { NONE, RED, YELLOW, GREEN, BLUE };
 
     private Listener listener;
     private RadioGroup answerGroup;
+    private int remaining;
+    int correctAnswer;
 
     public QuestionFragment() { /* Required empty public constructor */ }
 
@@ -53,6 +55,7 @@ public class QuestionFragment extends Fragment {
         answerGroup = (RadioGroup) view.findViewById(R.id.answer_group);
 
         Bundle args = getArguments();
+        correctAnswer = args.getInt(KEY_CORRECT);
         if (args == null) throw new RuntimeException("QuestionFragment: No args found");
 
         int max = 1000 * args.getInt(KEY_TTL);
@@ -62,7 +65,7 @@ public class QuestionFragment extends Fragment {
         new CountDownTimer(max, 40) {
 
             public void onTick(long remainingMillis) {
-                int remaining = (int) remainingMillis;
+                remaining = (int) remainingMillis;
                 countdown.setText(String.format("%d", remaining / 1000));
                 timeRemaining.setProgress(timeRemaining.getMax() - remaining);
             }
@@ -75,7 +78,7 @@ public class QuestionFragment extends Fragment {
                     rb.setEnabled(false);
                 answerGroup.setEnabled(false);
 
-                listener.submitAnswer(getAnswer(),args.getInt(KEY_CORRECT));
+                listener.submitAnswer(getAnswer(),correctAnswer,0);
 
             }
         }.start();
@@ -102,4 +105,7 @@ public class QuestionFragment extends Fragment {
                 return Answer.NONE;
         }
     }
+   public void onCommitAnswer(View v){
+        listener.submitAnswer(getAnswer(),correctAnswer,remaining);
+   }
 }

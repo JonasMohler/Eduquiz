@@ -63,5 +63,11 @@
         </RadioGroup>
 
     </ScrollView>
+    <Button
+        android:id="@+id/commitAnswerButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="onCommitAnswer"
+        android:text="Commit"/>
 
 </LinearLayout>
