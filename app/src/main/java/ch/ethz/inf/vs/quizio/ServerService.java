@@ -189,6 +189,11 @@ public class ServerService extends Service {
                     hasQuestionStarted = false;
                     questionNumber += 1;
                     quiz.currentQuestion += 1;
+
+                    if (questionNumber == numQuestions) {
+                        Intent intent = new Intent(getApplicationContext(), ModeratorScoreboardActivity.class);
+                        startActivity(intent);
+                    }
                     Intent intent = new Intent(getApplicationContext(), ModeratorResultActivity.class);
                     startActivity(intent);
                     prefsEditor.putInt("currentQuestion",questionNumber);

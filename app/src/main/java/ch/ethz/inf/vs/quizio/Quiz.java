@@ -113,6 +113,16 @@ public class Quiz {
         return names;
     }
 
+    public String getAllPlayerNamesString () {
+        String result = "";
+        Integer n = playerList.size();
+        for(Integer i = 0;i<=n;i++){
+            result = result + playerList.get(i).name
+                    +  System.lineSeparator();
+        }
+        return result;
+    }
+
     public void createQuestionSet() {
         for (int i = 1; i < questionList.size(); i++) {
             questionStringSet.add(questionList.get(i).asString());
@@ -121,11 +131,11 @@ public class Quiz {
 
     public String getFinalScoreboard() {
         this.sortPlayers();
-        String result;
+        String result = "";
         Integer n = playerList.size();
         for(Integer i = 0;i<=n;i++){
-            result = i.toString() + ". "  + playerList.get(i).getScore()
-                    +  " with " + playerList.get(i).getScore() +  System.lineSeparator();
+            result = result + i.toString() + ". "  + playerList.get(i).name
+                    +  " with " + playerList.get(i).getScore() + " Points" +  System.lineSeparator();
         }
         /*
         1. Name with XX Points

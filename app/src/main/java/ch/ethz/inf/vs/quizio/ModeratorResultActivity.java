@@ -1,11 +1,15 @@
 package ch.ethz.inf.vs.quizio;
 
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+
+import com.google.gson.Gson;
 
 public class ModeratorResultActivity extends AppCompatActivity {
 
@@ -15,7 +19,7 @@ public class ModeratorResultActivity extends AppCompatActivity {
         setContentView(R.layout.activity_moderator_result);
 
 
-        //TODO: Current Question laden
+
 
         final Button button = findViewById(R.id.nextbutton);
         button.setOnClickListener(new View.OnClickListener() {
@@ -24,8 +28,14 @@ public class ModeratorResultActivity extends AppCompatActivity {
             }
         });
 
-        Question question = null;
-        Quiz quiz = null;
+        SharedPreferences mPrefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        SharedPreferences.Editor prefsEditor = mPrefs.edit();
+        Gson gson = new Gson();
+        String json = mPrefs.getString("quiz", "");
+        Quiz quiz = gson.fromJson(json, Quiz.class);
+
+        Question question = quiz.getQuestion(quiz.currentQuestion);
+
 
         TextView rank1 = (TextView) findViewById(R.id.rank1);
         TextView rank2 = (TextView) findViewById(R.id.rank2);
