@@ -28,16 +28,6 @@ public class CreateQuestionActivity extends AppCompatActivity {
             public void onClick(View v) {
 
 
-                /*
-                TextView question = (TextView) findViewById(R.id.textView1);
-                TextView answer1 = (TextView) findViewById(R.id.textView3);
-                TextView answer2 = (TextView) findViewById(R.id.textView5);
-                TextView answer3 = (TextView) findViewById(R.id.textView7);
-                TextView answer4 = (TextView) findViewById(R.id.textView9);
-                TextView correctAns = (TextView) findViewById(R.id.textView11);
-                */
-
-
 
                 EditText question = findViewById(R.id.editText0);
                 EditText answer1 = findViewById(R.id.editText1);
@@ -45,6 +35,7 @@ public class CreateQuestionActivity extends AppCompatActivity {
                 EditText answer3 = findViewById(R.id.editText3);
                 EditText answer4 = findViewById(R.id.editText4);
                 EditText correctAnswer = findViewById(R.id.editText5);
+                //TODO check all inputs and only proceed if inputs are correct
                 Integer CorAns = Integer.valueOf(correctAnswer.getText().toString());
 
 

@@ -31,10 +31,6 @@ import static ch.ethz.inf.vs.quizio.Util.encode;
 
 public class CreateQuizActivity extends AppCompatActivity {
     private static boolean quizResume = false;
-    public static boolean getQuizResume(){
-        return quizResume;
-    }
-    public static void setQuizResume(){quizResume = true;}
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,7 +38,7 @@ public class CreateQuizActivity extends AppCompatActivity {
         setContentView(R.layout.activity_create_quiz);
 
 
-        Quiz quizInit = new Quiz(0);
+        Quiz quizInit = new Quiz();
 
         SharedPreferences mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
         SharedPreferences.Editor prefsEditor = mPrefs.edit();
@@ -53,15 +49,15 @@ public class CreateQuizActivity extends AppCompatActivity {
 
         Button addQuestion = (Button) findViewById(R.id.add);
         Button submitQuiz = (Button) findViewById(R.id.submit);
-       // Button resumeQuiz = (Button) findViewById(R.id.resume);
+        Button resumeQuiz = (Button) findViewById(R.id.resume);
 
         ListView listView = (ListView) findViewById(R.id.questions);
 
-        //check if quiz is empty
+        //TODO check if quiz is empty otherwise you get error trying to access it
         ArrayAdapter<Question> adapter = new ArrayAdapter<Question>(this, android.R.layout.activity_list_item, gson.fromJson(mPrefs.getString("quiz", ""), Quiz.class).questionList);
         listView.setAdapter(adapter);
 
-        //add delete old version of question
+        //TODO add delete old version of QUESTION
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener(){
             @Override
             public void onItemClick(AdapterView<?>adapter, View v, int position, long id){
@@ -73,6 +69,14 @@ public class CreateQuizActivity extends AppCompatActivity {
             }
         });
 
+        resumeQuiz.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                setQuizResume();
+            }
+        });
+
+        //TODO show question in list, have to use adapter not list.add
         TextView question = new TextView(this);
         addQuestion.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -90,12 +94,16 @@ public class CreateQuizActivity extends AppCompatActivity {
             }
 
         });
-
+        //TODO check if quiz is empty
         submitQuiz.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 //join game screen
                 startService(new Intent(getApplicationContext(), ServerService.class));
+                //TODO create JoinScreenActivity (look at proposal) and make this intent to go there
+                Intent intent = new Intent(CreateQuizActivity.this,CreateQuestionActivity.class);
+                startActivity(intent);
+
 
                 //hide buttons and display message
                 TextView header = findViewById(R.id.header);
@@ -122,19 +130,11 @@ public class CreateQuizActivity extends AppCompatActivity {
 
         });
 
+    }
 
-        /*resumeQuiz.setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View v) {
-                quizResume = true;
-                startService(new Intent(getApplicationContext(), ServerService.class));
-            }
+    public static boolean getQuizResume(){
+        return quizResume;
+    }
+    public static void setQuizResume(){quizResume = true;}
 
-        });
-
-*/
-
-
-
-}
 }

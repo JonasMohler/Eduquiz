@@ -155,7 +155,6 @@ public class ServerService extends Service {
     public class QuizServer extends NanoHTTPD {
         int numAnswersSubmitted = 0;
         int questionNumber = 0;
-        int numPlayers = 0;
         boolean quizResumeDataAvailable = true;
         boolean hasQuestionStarted = false;
         SharedPreferences mPrefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
@@ -164,7 +163,8 @@ public class ServerService extends Service {
         String json = mPrefs.getString("quiz", "");
         Quiz quiz = gson.fromJson(json, Quiz.class);
         int numQuestions = quiz.questionList.size();
-        ArrayList<String> questions;
+        int numPlayers = quiz.getNumPlayers();
+        int numRejoinedPlayers = 0;
 
 
         public QuizServer() throws IOException {
@@ -208,33 +208,22 @@ public class ServerService extends Service {
             int oldNumPlayers = 0;
             if (CreateQuizActivity.getQuizResume()) {
                 if (parms.containsKey("resume")) {
-
-                    numPlayers += 1;
-                    if (numPlayers == 1) {
-                        SharedPreferences mPrefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-                        oldNumPlayers = mPrefs.getInt("oldNumPlayers", 0);
-                        int currentQuestion = mPrefs.getInt("currentQuestion", 0) + 1;
-                        questions.addAll(mPrefs.getStringSet("Questions", null));
-                        int gamecode = mPrefs.getInt("gamecode", 0);
-                    }
+                    numRejoinedPlayers += 1;
+                    SharedPreferences mPrefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
                     SharedPreferences.Editor prefsEditor = mPrefs.edit();
+                    String oldQuiz = parms.get("resume");
+                    prefsEditor.putString("quiz", oldQuiz);
+
                     Gson gson = new Gson();
-                    String json = mPrefs.getString("quiz", "");
-                    Quiz quiz = gson.fromJson(json, Quiz.class);
-                    quiz.PlayerJoins(new Player(parms.get("resume")));
-                    String quizUpdated = gson.toJson(quiz);
-                    prefsEditor.commit();
-                    if (oldNumPlayers == numPlayers) {
-                        //TODO:
-                        //please answer with <ResumeSucceeded><CurrentQuestion>
-                        //or with <WaitingForOtherPlayersToJoin>
+                    Quiz quiz = gson.fromJson(oldQuiz, Quiz.class);
+                    numPlayers = quiz.getNumPlayers();
+
+                    if(numRejoinedPlayers == numPlayers) {
+                        //TODO start next question
                         //TODO: please tell me (jonas) if client needs to send Quiz on resume or just the currentQuestion (int)
-
-
                         return new Response("ResumeSucceeded");
-                    } else {
-                        return new Response("WaitingForOtherPlayersToJoin");
                     }
+                    else return new Response("WaitingForOtherPlayersToJoin");
 
 
                 }
@@ -247,11 +236,14 @@ public class ServerService extends Service {
                 Quiz quiz = gson.fromJson(json, Quiz.class);
                 quiz.PlayerJoins(new Player(parms.get("join")));
                 String quizUpdated = gson.toJson(quiz);
-                prefsEditor.putInt("gamecode", quiz.gameCode);
-                prefsEditor.putStringSet("Questions",quiz.questionStringSet);
-                prefsEditor.putInt("oldNumPlayers",numPlayers);
+
+                //prefsEditor.putInt("gamecode", quiz.gameCode);
+                //prefsEditor.putStringSet("Questions",quiz.questionStringSet);
+                //prefsEditor.putInt("oldNumPlayers",numPlayers);
+
                 prefsEditor.putString("quiz", quizUpdated);
-                int gamecode = mPrefs.getInt("gamecode", 0);
+                //int gamecode = mPrefs.getInt("gamecode", 0);
+
                 prefsEditor.commit();
                 //TODO:
                 //client send name and code in header, see if they fit
@@ -271,7 +263,8 @@ public class ServerService extends Service {
                 //
                 //on fail please send <JoinFailed><FailureMessage>
 
-                return new Response("JoinSucceeded");
+                return new Response("<JoinSucceeded><"+ quizUpdated + ">");
+
 
             } else if (parms.containsKey("startQuestion")) {
                 startNextQuestion();
