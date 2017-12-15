@@ -22,8 +22,17 @@ public class Quiz {
     public Integer gameCode;
     Set<String> questionStringSet = new HashSet<String>();
 
-    public Quiz(Integer gameCode) {
-        this.gameCode = gameCode;
+    public Quiz() {
+        this.gameCode = generateCode();
+    }
+
+    public int generateCode() {
+        //generate a 4 digit integer 1000 <10000
+        return (int)(Math.random()*9000)+1000;
+    }
+
+    public int getNumPlayers () {
+        return this.playerList.size();
     }
 
     public Question getQuestion (Integer questionNumber)  {
@@ -49,7 +58,7 @@ public class Quiz {
     }
 
 
-    public void playerrejoins(String name,ArrayList<Integer> answers){
+    public void playerRejoins(String name,ArrayList<Integer> answers){
         Player player = new Player(name);
         for (int i = 1;i<answers.size();i++){
             PlayerAnswers(player,answers.get(i),answers.get(i));
