@@ -153,22 +153,29 @@ public class ServerService extends Service {
     }
 
     public class QuizServer extends NanoHTTPD {
+        //boolean quizResumeDataAvailable = true;
         int numAnswersSubmitted = 0;
         int questionNumber = 0;
-        boolean quizResumeDataAvailable = true;
-        boolean hasQuestionStarted = false;
+        int numRejoinedPlayers = 0;
+        int numQuestions = 0;
+        int numPlayers = 0;
+        Quiz quiz;
+        boolean hasQuestionStarted = true;
         SharedPreferences mPrefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         SharedPreferences.Editor prefsEditor = mPrefs.edit();
         Gson gson = new Gson();
-        String json = mPrefs.getString("quiz", "");
-        Quiz quiz = gson.fromJson(json, Quiz.class);
-        int numQuestions = quiz.questionList.size();
-        int numPlayers = quiz.getNumPlayers();
-        int numRejoinedPlayers = 0;
 
 
         public QuizServer() throws IOException {
             super(8080);
+            //only do this if Quizserver is started for the first time
+            if(!CreateQuizActivity.getQuizResume()) {
+                String json = mPrefs.getString("quiz", "");
+                quiz = gson.fromJson(json, Quiz.class);
+                numQuestions = quiz.questionList.size();
+                numPlayers = quiz.getNumPlayers();
+
+            }
             start();
             System.out.println("\nRunning! Point your browsers to http://localhost:8080/ \n");
         }
@@ -203,24 +210,21 @@ public class ServerService extends Service {
 
         @Override
         public Response serve(IHTTPSession session) {
-            quiz.createQuestionSet();
+            //quiz.createQuestionSet();
             Map<String, String> parms = session.getParms();
-            int oldNumPlayers = 0;
+
             if (CreateQuizActivity.getQuizResume()) {
+                //TODO JONAS: send us Quiz
                 if (parms.containsKey("resume")) {
                     numRejoinedPlayers += 1;
-                    SharedPreferences mPrefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-                    SharedPreferences.Editor prefsEditor = mPrefs.edit();
                     String oldQuiz = parms.get("resume");
                     prefsEditor.putString("quiz", oldQuiz);
-
-                    Gson gson = new Gson();
-                    Quiz quiz = gson.fromJson(oldQuiz, Quiz.class);
+                    quiz = gson.fromJson(oldQuiz, Quiz.class);
                     numPlayers = quiz.getNumPlayers();
+                    numQuestions = quiz.questionList.size();
 
                     if(numRejoinedPlayers == numPlayers) {
-                        //TODO start next question
-                        //TODO: please tell me (jonas) if client needs to send Quiz on resume or just the currentQuestion (int)
+                        startNextQuestion();
                         return new Response("ResumeSucceeded");
                     }
                     else return new Response("WaitingForOtherPlayersToJoin");
@@ -229,57 +233,30 @@ public class ServerService extends Service {
                 }
             } else if (parms.containsKey("join")) {
                 numPlayers += 1;
-                SharedPreferences mPrefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-                SharedPreferences.Editor prefsEditor = mPrefs.edit();
-                Gson gson = new Gson();
                 String json = mPrefs.getString("quiz", "");
                 Quiz quiz = gson.fromJson(json, Quiz.class);
                 quiz.PlayerJoins(new Player(parms.get("join")));
                 String quizUpdated = gson.toJson(quiz);
-
-                //prefsEditor.putInt("gamecode", quiz.gameCode);
-                //prefsEditor.putStringSet("Questions",quiz.questionStringSet);
-                //prefsEditor.putInt("oldNumPlayers",numPlayers);
-
                 prefsEditor.putString("quiz", quizUpdated);
-                //int gamecode = mPrefs.getInt("gamecode", 0);
-
                 prefsEditor.commit();
-                //TODO:
-                //client send name and code in header, see if they fit
-                //also respond with <JoinSucceeded><Quiz> where Quiz is a JSONObject
-                //Quiz: int QuestionCount
-                //      JSONOBject Questions
-                //where Questions:
-                //                  "q0" : JSONObject Question
-                //                  "q1" : JSONObject Question
-                //                          ...
-                //where JSONObject Question:
-                //                          "theQuestion" : question
-                //                          "answer1" : answer 1
-                //                              ...
-                //                          "correctAnswer" : correctAnswer (int)
-                //
-                //
-                //on fail please send <JoinFailed><FailureMessage>
 
-                return new Response("<JoinSucceeded><"+ quizUpdated + ">");
+                return new Response("JoinSucceeded");
 
 
             } else if (parms.containsKey("startQuestion")) {
+
+                String jsonQuiz = mPrefs.getString("quiz", "");
                 startNextQuestion();
-                return new Response("QuestionStarted");
+                return new Response("QuestionStarted" + jsonQuiz);
 
             } else if (parms.containsKey("isQuestionStarted")) {
                 if (hasQuestionStarted) {
-
                     return new Response("<true>");
                 } else return new Response("<false>");
 
             } else if (parms.containsKey("submitAnswer")) {
-                //TODO: needs to take a boolean to know if answer was right
-
-                //calcualte points, add them to playerscore, send playerscores
+                //TODO JONAS: send Answer and Player
+                //TODO JONAS calcualte points and update Player
                 numAnswersSubmitted += 1;
                 if (numAnswersSubmitted == numPlayers) {
                     numAnswersSubmitted = 0;
@@ -290,9 +267,10 @@ public class ServerService extends Service {
                     prefsEditor.putInt("currentQuestion",questionNumber);
                 }
                 if (questionNumber == numQuestions) {
-                    //start ScoreBoardActivity
+                    Intent intent = new Intent(getApplicationContext(), ModeratorScoreboardActivity.class);
+                    startActivity(intent);
                 }
-                //TODO
+                //TODO return "AnswerReceived" + Player (has points and ranking)
                 //client expects <AnswerReceived><ranking> where ranking is a JSONObject
                 // ranking{"points":points , "rank":rank"} (both ints)
                 return new Response("AnswerReceived");

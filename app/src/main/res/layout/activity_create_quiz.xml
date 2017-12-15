@@ -36,6 +36,13 @@
             android:layout_weight="1"
             android:text="submitQuiz" />
 
+        <Button
+            android:id="@+id/resume"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="resumeQuiz" />
+
         <TextView
             android:id="@+id/QuizCreatedText"
             android:layout_width="match_parent"
