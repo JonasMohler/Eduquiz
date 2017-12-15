@@ -260,7 +260,7 @@ public class ServerService extends Service {
                 } else return new Response("<false>");
 
             } else if (parms.containsKey("submitAnswer")) {
-                //TODO JONAS: send Answer and Player
+                //TODO JONAS: send Player, Answer and Timestamp
                 //TODO JONAS calcualte points and update Player
                 numAnswersSubmitted += 1;
                 if (numAnswersSubmitted == numPlayers) {
