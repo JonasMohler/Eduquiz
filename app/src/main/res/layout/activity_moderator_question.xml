@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="ch.ethz.inf.vs.quizio.ModeratorQuestionActivity">
+
+    <TextView
+        android:id="@+id/answer3"
+        android:layout_width="273dp"
+        android:layout_height="100dp"
+        android:background="@drawable/answer_green"
+        android:gravity="center"
+        android:text="answer3"
+        tools:layout_editor_absoluteX="16dp"
+        tools:layout_editor_absoluteY="243dp" />
+
+    <TextView
+        android:id="@+id/answer4"
+        android:layout_width="273dp"
+        android:layout_height="100dp"
+        android:background="@drawable/answer_blue"
+        android:gravity="center"
+        android:text="answer4"
+        tools:layout_editor_absoluteX="303dp"
+        tools:layout_editor_absoluteY="243dp" />
+
+    <TextView
+        android:id="@+id/answer2"
+        android:layout_width="273dp"
+        android:layout_height="100dp"
+        android:background="@drawable/answer_yellow"
+        android:gravity="center"
+        android:text="answer2"
+        tools:layout_editor_absoluteX="303dp"
+        tools:layout_editor_absoluteY="125dp" />
+
+    <TextView
+        android:id="@+id/answer1"
+        android:layout_width="273dp"
+        android:layout_height="100dp"
+        android:background="@drawable/answer_red"
+        android:gravity="center"
+        android:text="answer1"
+        tools:layout_editor_absoluteX="16dp"
+        tools:layout_editor_absoluteY="129dp" />
+
+    <TextView
+        android:id="@+id/question"
+        android:layout_width="562dp"
+        android:layout_height="89dp"
+        android:gravity="center"
+        android:text="question"
+
+        tools:layout_editor_absoluteX="16dp"
+        tools:layout_editor_absoluteY="16dp" />
+</android.support.constraint.ConstraintLayout>

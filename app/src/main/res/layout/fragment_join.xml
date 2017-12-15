@@ -1,0 +1,76 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="ch.ethz.inf.vs.quizio.JoinFragment">
+
+    <TextView
+        android:text="@string/join_quiz"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="3"
+        android:gravity="center"
+        android:textSize="48sp"
+    />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="4"
+        android:orientation="vertical" >
+
+        <TextView
+            android:text="@string/your_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:textSize="24sp" />
+
+        <EditText
+            android:id="@+id/player_name"
+            android:hint="@string/name_hint"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            android:singleLine="true"
+            android:textSize="24sp"
+            android:textColor="#303030"
+            android:textColorHint="#808080"
+            android:background="#C3C3C3" />
+
+        <TextView
+            android:text="@string/quiz_code"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:textSize="24sp" />
+
+        <EditText
+            android:id="@+id/quiz_code"
+            android:digits="/+0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+            android:hint="@string/code_hint"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            android:singleLine="true"
+            android:textSize="24sp"
+            android:textColor="#303030"
+            android:textColorHint="#808080"
+            android:background="#C3C3C3" />
+
+    </LinearLayout>
+
+    <ImageButton
+        android:id="@+id/join_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end"
+        android:padding="10dp"
+        android:scaleX="1.5"
+        android:scaleY="1.5"
+        android:background="?android:attr/selectableItemBackground"
+        android:src="@drawable/arrow_forward"
+        android:contentDescription="@null" />
+
+</LinearLayout>
