@@ -69,12 +69,7 @@ public class CreateQuizActivity extends AppCompatActivity {
             }
         });
 
-        resumeQuiz.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                setQuizResume();
-            }
-        });
+
 
         //TODO show question in list, have to use adapter not list.add
         TextView question = new TextView(this);
@@ -101,8 +96,7 @@ public class CreateQuizActivity extends AppCompatActivity {
                 //join game screen
                 startService(new Intent(getApplicationContext(), ServerService.class));
                 //TODO create JoinScreenActivity (look at proposal) and make this intent to go there
-                Intent intent = new Intent(CreateQuizActivity.this,CreateQuestionActivity.class);
-                startActivity(intent);
+
 
 
                 //hide buttons and display message
@@ -125,6 +119,10 @@ public class CreateQuizActivity extends AppCompatActivity {
                 String code = encode(wifiMan);
                 ShowCode.setText(code);
                 ShowCode.setVisibility(View.VISIBLE);
+
+
+                Intent intent = new Intent(CreateQuizActivity.this,ModeratorActivity.class);
+                startActivity(intent);
 
             }
 
