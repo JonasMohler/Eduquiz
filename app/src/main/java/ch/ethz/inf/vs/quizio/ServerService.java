@@ -298,9 +298,25 @@ public class ServerService extends Service {
                     Intent intent = new Intent(getApplicationContext(), ModeratorScoreboardActivity.class);
                     startActivity(intent);
                 }
-                //TODO return "AnswerReceived/" + Player (has points and ranking)
 
-                return new Response("AnswerReceived/");
+                String json = mPrefs.getString("player", "");
+                Player thePlayer = gson.fromJson(json, Player.class);
+
+                ArrayList<Player> playersList = quiz.playerList;
+                for(Integer i = 0;i<playersList.size();i++){
+                    if (playersList.get(i).name == thePlayer.name) {
+                        playersList.set(i,thePlayer);
+                    }
+                }
+                quiz.playerList = playersList;
+                thePlayer = quiz.getRankForPlayer(thePlayer);
+
+                String quizUpdated = gson.toJson(quiz);
+                prefsEditor.putString("quiz", quizUpdated);
+                prefsEditor.commit();
+
+
+                return new Response("AnswerReceived/"+thePlayer);
             }
 
             return new Response(null);

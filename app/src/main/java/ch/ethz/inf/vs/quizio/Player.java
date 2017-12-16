@@ -35,4 +35,8 @@ public class Player {
         }
         hasAnswerd = true;
     }
+
+    public void updateRank() {
+
+    }
 }

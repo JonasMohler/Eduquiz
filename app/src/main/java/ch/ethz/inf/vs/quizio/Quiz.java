@@ -138,6 +138,17 @@ public class Quiz {
         }
     }
 
+    public Player getRankForPlayer(Player player) {
+        int rank = 0;
+        this.sortPlayers();
+        for(Integer i = 0;i<playerList.size();i++){
+            if (player == playerList.get(i)) {
+                player.rank = i + 1;
+            }
+        }
+        return player;
+    }
+
     public String getFinalScoreboard() {
         this.sortPlayers();
         String result = "";

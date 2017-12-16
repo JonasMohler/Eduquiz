@@ -4,6 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/Eduquiz.iml" filepath="$PROJECT_DIR$/Eduquiz.iml" />
       <module fileurl="file://C:\Users\jonas\Documents\GitHub\Eduquiz\.idea\Eduquiz.iml" filepath="C:\Users\jonas\Documents\GitHub\Eduquiz\.idea\Eduquiz.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Eduquiz.iml" filepath="$PROJECT_DIR$/Eduquiz.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
     </modules>
   </component>
