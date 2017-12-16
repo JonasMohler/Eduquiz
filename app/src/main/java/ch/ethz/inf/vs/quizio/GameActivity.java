@@ -107,7 +107,8 @@ public class GameActivity
 
 
     // Gets called when user accepts quiz (in JoinFragment)
-    @Override public void onJoin(String user, String code) { client.joinQuiz(mServerHost,mServerPort,user, code); }
+    @Override public void onJoin(String user, String code) {
+        client.joinQuiz(mServerHost,mServerPort,user, code); }
 
     // Gets called when time is up (in QuestionFragment)
     @Override public void submitAnswer(QuestionFragment.Answer ans,int correctAns, int timeRemaining) {
@@ -132,6 +133,7 @@ public class GameActivity
 
                    Log.d(TAG, "Service discovery success" + service);
                    if (service.getServiceName().contains("NsdChat")) {
+                       initializeResolveListener();
                        mNsdManager.resolveService(service, mResolveListener);
                    }
 

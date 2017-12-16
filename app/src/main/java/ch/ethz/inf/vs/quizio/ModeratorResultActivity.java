@@ -1,6 +1,7 @@
 package ch.ethz.inf.vs.quizio;
 
 import android.content.SharedPreferences;
+import android.net.wifi.WifiManager;
 import android.preference.PreferenceManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -10,6 +11,9 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.google.gson.Gson;
+
+import java.net.HttpURLConnection;
+import java.net.URL;
 
 public class ModeratorResultActivity extends AppCompatActivity {
 
@@ -25,6 +29,19 @@ public class ModeratorResultActivity extends AppCompatActivity {
         button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 //TODO Call startNextQuestion in ServerService
+                try{
+
+                    WifiManager manager = (WifiManager) getSystemService(WIFI_SERVICE);
+                    String ip = android.text.format.Formatter.formatIpAddress(manager.getConnectionInfo().getIpAddress());
+
+
+                    URL url = new URL("http://" + ip +":8080/?startQuestion");
+                    HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                    connection.setRequestMethod("POST");
+                    int status = connection.getResponseCode();
+                    int i = 0;
+                } catch (Exception e) {
+                    e.printStackTrace();}
             }
         });
 
@@ -34,7 +51,7 @@ public class ModeratorResultActivity extends AppCompatActivity {
         String json = mPrefs.getString("quiz", "");
         Quiz quiz = gson.fromJson(json, Quiz.class);
 
-        Question question = quiz.getQuestion(quiz.currentQuestion);
+        Question question = quiz.getQuestion(quiz.currentQuestion - 1);
 
 
         TextView rank1 = (TextView) findViewById(R.id.rank1);
@@ -42,15 +59,17 @@ public class ModeratorResultActivity extends AppCompatActivity {
         TextView rank3 = (TextView) findViewById(R.id.rank3);
         TextView answer = (TextView) findViewById(R.id.answer);
         TextView background = (TextView) findViewById(R.id.background);
+        if (quiz.playerList.size()>0) {
+            Player playerRank1 = quiz.getPlayerOnRank(0);
+            Player playerRank2 = quiz.getPlayerOnRank(1);
+            Player playerRank3 = quiz.getPlayerOnRank(2);
 
-        Player playerRank1 = quiz.getPlayerOnRank(1);
-        Player playerRank2 = quiz.getPlayerOnRank(2);
-        Player playerRank3 = quiz.getPlayerOnRank(3);
+            rank1.setText("1. " + playerRank1.name + " with " + playerRank1.getScore().toString() + " Points");
+            rank2.setText("2. " + playerRank2.name + " with " + playerRank2.getScore().toString() + " Points");
+            rank3.setText("3. " + playerRank3.name + " with " + playerRank3.getScore().toString() + " Points");
 
-        rank1.setText("1. " + playerRank1.name + " with " + playerRank1.getScore().toString() + " Points");
-        rank2.setText("2. " + playerRank2.name + " with " + playerRank2.getScore().toString() + " Points");
-        rank3.setText("3. " + playerRank3.name + " with " + playerRank3.getScore().toString() + " Points");
 
+        }
 
         //Todo: Farben richtig setzen
 

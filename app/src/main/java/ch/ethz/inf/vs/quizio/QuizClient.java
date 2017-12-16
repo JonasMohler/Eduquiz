@@ -64,23 +64,23 @@ public class QuizClient extends Thread {
         Log.d(TAG, "Start listening for quizzes");
 
         //Wait until join is successful
-            while (!joined) {
-                try {
-                    sleep(2000);
-                } catch (InterruptedException e) {
-                    Log.d(TAG,"interrupted on waiting to join quiz");
-                    e.printStackTrace();
-                }
+        while (!joined) {
+            try {
+                sleep(2000);
+            } catch (InterruptedException e) {
+                Log.d(TAG,"interrupted on waiting to join quiz");
+                e.printStackTrace();
             }
-            // Did we kill the thread?
-            lock.lock();
-            if (kill) {
-                lock.unlock();
-                return;
-            }
+        }
+        // Did we kill the thread?
+        lock.lock();
+        if (kill) {
             lock.unlock();
+            return;
+        }
+        lock.unlock();
 
-            Log.d(TAG, "Start waiting loop");
+        Log.d(TAG, "Start waiting loop");
 
         // After joining, we should now have the quiz
         // start the game loop
@@ -120,74 +120,89 @@ public class QuizClient extends Thread {
     }
 
     void joinQuiz(InetAddress host, int port,String name,String code) {
-
+        //TODO auf 8080 gesetzt
         this.host = host;
-        this.port = port;
+        this.port = 8080;
 
         //setup a connection to the server
-        try{
 
 
-            URL url = new URL("http://"+host+":"+port+"/join");
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestMethod("POST");
-            BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-            PrintWriter pw = new PrintWriter(connection.getOutputStream());
-
-            JSONObject data = new JSONObject();
-            data.put("name",name);
-            data.put("code",code);
-            pw.print(data.toString());
-
-            //read answer from server
-            int status = connection.getResponseCode();
-
-            if(status==200){
-
-            StringBuilder sBuilder = new StringBuilder();
-            String line = "";
-            while((line = in.readLine()) != null){
-                sBuilder.append(line+"\n");
-            }
-            String response = sBuilder.toString();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try{
 
 
-                String message;
-                String error;
+                    URL url = new URL("http:/"+host+":"+8080+"/?join" );
+                    HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                    connection.setRequestMethod("POST");
 
-                StringTokenizer st = new StringTokenizer(response, "/");
+                    PrintWriter pw = new PrintWriter(connection.getOutputStream());
+                    JSONObject data = new JSONObject();
+                    data.put("name",name);
+                    data.put("code",code);
+                    pw.print(data.toString());
 
-                //Unsuccessful
-                if ((message = st.nextToken()).equals("JoinFailed")) {
-                    //join was unsuccessful, handle the problem
-                    if ((error = st.nextToken()).equals("wrongCode")) {
-                        //prompt user to input right code
-                        listener.onJoinResult(false, error);
-                    } else {
-                        //prompt user to chose another name
-                        listener.onJoinResult(false, error);
+
+                    BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+
+
+                    //read answer from server
+                    int status = connection.getResponseCode();
+
+
+                    if(status==200){
+
+                        StringBuilder sBuilder = new StringBuilder();
+                        String line = "";
+                        while((line = in.readLine()) != null){
+                            sBuilder.append(line+"\n");
+                        }
+                        String response = sBuilder.toString();
+
+
+                        String message;
+                        String error;
+
+                        StringTokenizer st = new StringTokenizer(response, "/");
+
+                        //Unsuccessful
+                        if (st.hasMoreElements()) {
+                            if ((message = st.nextToken()).equals("JoinFailed")) {
+                                //join was unsuccessful, handle the problem
+                                if ((error = st.nextToken()).equals("wrongCode")) {
+                                    //prompt user to input right code
+                                    listener.onJoinResult(false, error);
+                                } else {
+                                    //prompt user to chose another name
+                                    listener.onJoinResult(false, error);
+                                }
+                                //Success
+                            } else if (message.equals("JoinSuccessful")) {
+
+                                //go forward in game
+                                player = new Player(name);
+                                joined = true;
+                                getQuiz();
+                                listener.onJoinResult(true, null);
+                                //Unexpected response
+                            } else {
+                                Log.d(TAG, "Unknown response on trying to Join");
+                            }
+                        }
+
+
+                    }else{
+                        listener.onJoinResult(false,"Bad server response");
                     }
-                    //Success
-                } else if (message.equals("JoinSuccessful")) {
-
-                    //go forward in game
-                    player = new Player(name);
-                    joined = true;
-                    getQuiz();
-                    listener.onJoinResult(true, null);
-                    //Unexpected response
-                } else {
-                    Log.d(TAG, "Unknown response on trying to Join");
                 }
-
-            }else{
-                listener.onJoinResult(false,"Bad server response");
+                catch (Exception e){
+                    Log.d(TAG,":on join quiz communication");
+                    e.printStackTrace();
+                }
             }
-        }
-        catch (Exception e){
-            Log.d(TAG,":on join quiz communication");
-            e.printStackTrace();
-        }
+        }).start();
+
 
 
 
@@ -213,8 +228,8 @@ public class QuizClient extends Thread {
             case 4:
                 //blue
                 corrAns = QuestionFragment.Answer.BLUE;
-                default:
-                    corrAns = QuestionFragment.Answer.NONE;
+            default:
+                corrAns = QuestionFragment.Answer.NONE;
 
         }
         boolean right = (corrAns.equals(ans));
@@ -249,18 +264,18 @@ public class QuizClient extends Thread {
 
                 StringTokenizer st = new StringTokenizer(response,"/");
                 //expected response
-                    if(st.nextToken().equals("AnswerReceived")) {
+                if(st.nextToken().equals("AnswerReceived")) {
 
 
-                        player = new Gson().fromJson(st.nextToken(), Player.class);
-                        points = player.getScore();
-                        rank = player.getRank();
+                    player = new Gson().fromJson(st.nextToken(), Player.class);
+                    points = player.getScore();
+                    rank = player.getRank();
 
-                        //forward to game activity
-                        listener.onResult(right, points, rank);
-                    }else{
-                        Log.d(TAG,"server did not accept response");
-                    }
+                    //forward to game activity
+                    listener.onResult(right, points, rank);
+                }else{
+                    Log.d(TAG,"server did not accept response");
+                }
             }else{
                 Log.d(TAG,"Bad server response");
             }
@@ -300,7 +315,7 @@ public class QuizClient extends Thread {
                 }
                 String response = sb.toString();
 
-                    quiz = new Gson().fromJson(response,Quiz.class);
+                quiz = new Gson().fromJson(response,Quiz.class);
 
             }else{
                 Log.d(TAG,"bad server response");
@@ -392,7 +407,7 @@ public class QuizClient extends Thread {
             e.printStackTrace();
         }
 
-    return false;
+        return false;
     }
 
 

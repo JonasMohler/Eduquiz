@@ -31,26 +31,31 @@ import static ch.ethz.inf.vs.quizio.Util.encode;
 
 public class CreateQuizActivity extends AppCompatActivity {
     private static boolean quizResume = false;
+    SharedPreferences mPrefs;
+    SharedPreferences.Editor prefsEditor;
+    Gson gson;
 
-    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_quiz);
 
+        mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+        prefsEditor = mPrefs.edit();
+        gson = new Gson();
 
-        Quiz quizInit = new Quiz();
+        if(!quizResume){
+            Quiz quizInit = new Quiz();
+            String quiz = gson.toJson(quizInit);
+            prefsEditor.putString("quiz", quiz);
+            prefsEditor.commit();
+        }
 
-        SharedPreferences mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
-        SharedPreferences.Editor prefsEditor = mPrefs.edit();
-        Gson gson = new Gson();
-        String quiz = gson.toJson(quizInit);
-        prefsEditor.putString("quiz", quiz);
-        prefsEditor.commit();
+        startService(new Intent(getApplicationContext(), ServerService.class));
+
 
         Button addQuestion = (Button) findViewById(R.id.add);
         Button submitQuiz = (Button) findViewById(R.id.submit);
         Button resumeQuiz = (Button) findViewById(R.id.resume);
-
         ListView listView = (ListView) findViewById(R.id.questions);
 
         //TODO check if quiz is empty otherwise you get error trying to access it
@@ -69,7 +74,12 @@ public class CreateQuizActivity extends AppCompatActivity {
             }
         });
 
-
+        resumeQuiz.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                setQuizResume();
+            }
+        });
 
         //TODO show question in list, have to use adapter not list.add
         TextView question = new TextView(this);
@@ -94,8 +104,8 @@ public class CreateQuizActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 //join game screen
-                startService(new Intent(getApplicationContext(), ServerService.class));
-                //TODO create JoinScreenActivity (look at proposal) and make this intent to go there
+                //startService(new Intent(getApplicationContext(), ServerService.class));
+
                 Intent intent = new Intent(CreateQuizActivity.this,ModeratorActivity.class);
                 startActivity(intent);
 

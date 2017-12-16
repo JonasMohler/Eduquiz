@@ -44,6 +44,9 @@ import java.net.InetAddress;
 
 import com.google.gson.Gson;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -66,27 +69,19 @@ public class ServerService extends Service {
     RegistrationListener mRegistrationListener;
     String mServiceName;
     NsdManager mNsdManager;
-    private final IBinder mBinder = new LocalBinder();
+
 
 
     public ServerService() {
 
     }
 
-    public class LocalBinder extends Binder {
-        ServerService getService() {
-            // Return this instance of LocalService so clients can call public methods
-            return ServerService.this;
-        }
-    }
-
-
-
     @Override
     public IBinder onBind(Intent intent) {
-        return mBinder;
-    }
+        // TODO: Return the communication channel to the service.
 
+        throw new UnsupportedOperationException("Not yet implemented");
+    }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -163,8 +158,6 @@ public class ServerService extends Service {
         };
     }
 
-
-
     public class QuizServer extends NanoHTTPD {
         //boolean quizResumeDataAvailable = true;
         int numAnswersSubmitted = 0;
@@ -179,6 +172,8 @@ public class ServerService extends Service {
         Gson gson = new Gson();
 
 
+
+
         public QuizServer() throws IOException {
             super(8080);
             //only do this if Quizserver is started for the first time
@@ -190,6 +185,13 @@ public class ServerService extends Service {
 
             }
             start();
+            /*
+            try {
+                InetAddress ip = InetAddress.getLocalHost();
+                prefsEditor.putInt("port", this.getListeningPort());
+                prefsEditor.putString("host", ip.getHostName());
+            } catch (Exception e) {e.printStackTrace();}
+            */
             System.out.println("\nRunning! Point your browsers to http://localhost:8080/ \n");
         }
 
@@ -208,9 +210,14 @@ public class ServerService extends Service {
                     numAnswersSubmitted = 0;
                     hasQuestionStarted = false;
                     questionNumber += 1;
+                    String json = mPrefs.getString("quiz", "");
+                    quiz = gson.fromJson(json, Quiz.class);
                     quiz.currentQuestion += 1;
-
-                    if (questionNumber == numQuestions) {
+                    prefsEditor.putInt("currentQuestion",questionNumber);
+                    String quizUpdated = gson.toJson(quiz);
+                    prefsEditor.putString("quiz", quizUpdated);
+                    prefsEditor.commit();
+                    if (quiz.currentQuestion == quiz.questionList.size()) {
                         Intent intent = new Intent(getApplicationContext(), ModeratorScoreboardActivity.class);
                         startActivity(intent);
                     }
@@ -218,7 +225,7 @@ public class ServerService extends Service {
                         Intent intent = new Intent(getApplicationContext(), ModeratorResultActivity.class);
                         startActivity(intent);
                     }
-                    prefsEditor.putInt("currentQuestion",questionNumber);
+
                 }
             }, timeForThisQuestion*1000);
         }
@@ -247,32 +254,33 @@ public class ServerService extends Service {
 
                 }
             } else if (parms.containsKey("join")) {
-                //TODO Peter/Valentin: Client needs to check if name is already taken or not and if code is valid
-                //TODO also server should send a message on failed join so client knows why it failed
-                //hier mein vorschlag...
-                if(false /*name schon benutzt*/){
-                    return new Response("JoinFailed/Choose a different name");
-                }else if(false /*code stimmt nicht */){
-                    return new Response("JoinFailed/Invalid Code");
-                }else {
+                try {
+                    JSONObject joinData = new JSONObject(parms.get("join"));
+                    if(quiz.playerList.contains(new Player(joinData.getString("name")))){
+                        return new Response("JoinFailed/Choose a different name");
+                    }else if(quiz.gameCode != joinData.getInt("code")){
+                        return new Response("JoinFailed/Invalid Code");
+                    }else {
+
+                        numPlayers += 1;
+                        String json = mPrefs.getString("quiz", "");
+                        Quiz quiz = gson.fromJson(json, Quiz.class);
+                        quiz.PlayerJoins(new Player(parms.get("join")));
+                        String quizUpdated = gson.toJson(quiz);
+                        prefsEditor.putString("quiz", quizUpdated);
+                        prefsEditor.commit();
+
+                        return new Response("JoinSucceeded");
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();}
 
 
-                    numPlayers += 1;
-                    String json = mPrefs.getString("quiz", "");
-                    Quiz quiz = gson.fromJson(json, Quiz.class);
-                    quiz.PlayerJoins(new Player(parms.get("join")));
-                    String quizUpdated = gson.toJson(quiz);
-                    prefsEditor.putString("quiz", quizUpdated);
-                    prefsEditor.commit();
-
-                    return new Response("JoinSucceeded");
-                }
 
             } else if (parms.containsKey("startQuestion")) {
 
-                String jsonQuiz = mPrefs.getString("quiz", "");
                 startNextQuestion();
-                return new Response("<QuestionStarted>" + jsonQuiz);
+                return new Response("<QuestionStarted>" );
 
             //need this to get quiz, if client would use startQuestion, moderator would got to question activity...
             }else if(parms.containsKey("getQuiz")) {
@@ -295,6 +303,21 @@ public class ServerService extends Service {
                 * player contains a clock now(whatever you want to do with that)
                 * */
 
+                numAnswersSubmitted += 1;
+                if (numAnswersSubmitted == numPlayers) {
+                    numAnswersSubmitted = 0;
+                    hasQuestionStarted = false;
+                    questionNumber += 1;
+                    prefsEditor.putInt("currentQuestion",questionNumber);
+                    Intent intent = new Intent(getApplicationContext(), ModeratorResultActivity.class);
+                    startActivity(intent);
+
+                }
+                if (questionNumber == numQuestions) {
+                    Intent intent = new Intent(getApplicationContext(), ModeratorScoreboardActivity.class);
+                    startActivity(intent);
+                }
+
                 String json = mPrefs.getString("player", "");
                 Player thePlayer = gson.fromJson(json, Player.class);
 
@@ -310,22 +333,6 @@ public class ServerService extends Service {
                 String quizUpdated = gson.toJson(quiz);
                 prefsEditor.putString("quiz", quizUpdated);
                 prefsEditor.commit();
-
-                numAnswersSubmitted += 1;
-                if (numAnswersSubmitted == numPlayers) {
-                    numAnswersSubmitted = 0;
-                    hasQuestionStarted = false;
-                    questionNumber += 1;
-                    Intent intent = new Intent(getApplicationContext(), ModeratorResultActivity.class);
-                    startActivity(intent);
-                    prefsEditor.putInt("currentQuestion",questionNumber);
-                }
-                if (questionNumber == numQuestions) {
-                    Intent intent = new Intent(getApplicationContext(), ModeratorScoreboardActivity.class);
-                    startActivity(intent);
-                }
-
-
 
 
                 return new Response("AnswerReceived/"+thePlayer);

@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -34,6 +35,7 @@ public class Quiz {
     public int getNumPlayers () {
         return this.playerList.size();
     }
+
 
     public Question getQuestion (Integer questionNumber)  {
         try{
@@ -106,7 +108,7 @@ public class Quiz {
 
     public Player getPlayerOnRank(Integer rank) {
         sortPlayers();
-        if (rank>playerList.size()) rank = playerList.size()-1;
+        if (rank>=playerList.size()) rank = playerList.size()-1;
         return playerList.get(rank);
     }
 
