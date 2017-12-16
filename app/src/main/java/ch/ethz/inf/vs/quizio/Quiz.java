@@ -106,6 +106,7 @@ public class Quiz {
 
     public Player getPlayerOnRank(Integer rank) {
         sortPlayers();
+        if (rank>playerList.size()) rank = playerList.size()-1;
         return playerList.get(rank);
     }
 

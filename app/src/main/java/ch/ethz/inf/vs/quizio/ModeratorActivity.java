@@ -1,9 +1,14 @@
 package ch.ethz.inf.vs.quizio;
 
+import android.app.Service;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -15,6 +20,11 @@ import com.google.gson.Gson;
 public class ModeratorActivity extends AppCompatActivity {
     public TextView playersJoined;
     public Quiz quiz;
+
+
+
+
+
     @Override protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_moderator);
@@ -48,8 +58,7 @@ public class ModeratorActivity extends AppCompatActivity {
         final Button button = findViewById(R.id.startQuiz);
         button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                Intent intent = new Intent(getApplicationContext(), ModeratorQuestionActivity.class);
-                startActivity(intent);
+
             }
         });
 

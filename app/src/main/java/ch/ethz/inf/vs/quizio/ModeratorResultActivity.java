@@ -56,19 +56,19 @@ public class ModeratorResultActivity extends AppCompatActivity {
 
         if (question.CorrectAnswer == 1) {
             answer.setText(question.Answer1);
-            background.setBackgroundColor(1);
+            background.setBackgroundColor(ContextCompat.getColor(this, R.color.red));
         }
         if (question.CorrectAnswer == 2) {
             answer.setText(question.Answer2);
-            background.setBackgroundColor(1);
+            background.setBackgroundColor(ContextCompat.getColor(this, R.color.yellow));
         }
         if (question.CorrectAnswer == 3) {
             answer.setText(question.Answer3);
-            background.setBackgroundColor(1);
+            background.setBackgroundColor(ContextCompat.getColor(this, R.color.green));
         }
         if (question.CorrectAnswer == 4) {
             answer.setText(question.Answer4);
-            background.setBackgroundColor(1);
+            background.setBackgroundColor(ContextCompat.getColor(this, R.color.blue));
         }
 
 

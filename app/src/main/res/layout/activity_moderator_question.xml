@@ -10,49 +10,71 @@
         android:id="@+id/answer3"
         android:layout_width="273dp"
         android:layout_height="100dp"
+        android:layout_marginBottom="24dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
         android:background="@drawable/answer_green"
         android:gravity="center"
         android:text="answer3"
-        tools:layout_editor_absoluteX="16dp"
-        tools:layout_editor_absoluteY="243dp" />
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/answer4"
+        app:layout_constraintHorizontal_bias="0.571"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/answer1" />
 
     <TextView
         android:id="@+id/answer4"
         android:layout_width="273dp"
         android:layout_height="100dp"
+        android:layout_marginBottom="24dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="8dp"
         android:background="@drawable/answer_blue"
         android:gravity="center"
         android:text="answer4"
-        tools:layout_editor_absoluteX="303dp"
-        tools:layout_editor_absoluteY="243dp" />
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/answer2" />
 
     <TextView
         android:id="@+id/answer2"
         android:layout_width="273dp"
         android:layout_height="100dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="16dp"
         android:background="@drawable/answer_yellow"
         android:gravity="center"
         android:text="answer2"
-        tools:layout_editor_absoluteX="303dp"
-        tools:layout_editor_absoluteY="125dp" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/question" />
 
     <TextView
         android:id="@+id/answer1"
         android:layout_width="273dp"
         android:layout_height="100dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="16dp"
         android:background="@drawable/answer_red"
         android:gravity="center"
         android:text="answer1"
-        tools:layout_editor_absoluteX="16dp"
-        tools:layout_editor_absoluteY="129dp" />
+        app:layout_constraintEnd_toStartOf="@+id/answer2"
+        app:layout_constraintHorizontal_bias="0.571"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/question" />
 
     <TextView
         android:id="@+id/question"
         android:layout_width="562dp"
         android:layout_height="89dp"
+        android:layout_marginEnd="8dp"
+
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
         android:gravity="center"
         android:text="question"
-
-        tools:layout_editor_absoluteX="16dp"
-        tools:layout_editor_absoluteY="16dp" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 </android.support.constraint.ConstraintLayout>
