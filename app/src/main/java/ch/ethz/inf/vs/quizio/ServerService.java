@@ -230,7 +230,7 @@ public class ServerService extends Service {
 
                     if(numRejoinedPlayers == numPlayers) {
                         startNextQuestion();
-                        return new Response("ResumeSucceeded");
+                        return new Response("ResumeSucceeded/"+quiz.currentQuestion);
                     }
                     else return new Response("WaitingForOtherPlayersToJoin");
 
@@ -241,9 +241,9 @@ public class ServerService extends Service {
                 //TODO also server should send a message on failed join so client knows why it failed
                 //hier mein vorschlag...
                 if(false /*name schon benutzt*/){
-                    return new Response("<JoinFailed><Choose a different name>");
+                    return new Response("JoinFailed/Choose a different name");
                 }else if(false /*code stimmt nicht */){
-                    return new Response("<JoinFailed><Invalid Code>");
+                    return new Response("JoinFailed/Invalid Code");
                 }else {
 
 
@@ -255,7 +255,7 @@ public class ServerService extends Service {
                     prefsEditor.putString("quiz", quizUpdated);
                     prefsEditor.commit();
 
-                    return new Response("<JoinSucceeded>");
+                    return new Response("JoinSucceeded");
                 }
 
             } else if (parms.containsKey("startQuestion")) {
@@ -264,14 +264,18 @@ public class ServerService extends Service {
                 startNextQuestion();
                 return new Response("<QuestionStarted>" + jsonQuiz);
 
-            } else if (parms.containsKey("isQuestionStarted")) {
+            //need this to get quiz, if client would use startQuestion, moderator would got to question activity...
+            }else if(parms.containsKey("getQuiz")) {
+                String jsonQuiz = mPrefs.getString("quiz", "");
+                return new Response(jsonQuiz);
+
+            }else if (parms.containsKey("isQuestionStarted")) {
                 if (hasQuestionStarted) {
-                    return new Response("<true>");
-                } else return new Response("<false>");
+                    return new Response("true");
+                } else return new Response("false");
 
             } else if (parms.containsKey("submitAnswer")) {
-                //TODO JONAS: send Player, Answer and Timestamp
-                //TODO JONAS calcualte points and update Player
+                //TODO
 
                 /*
                 * Implemented point calculation in client
@@ -294,9 +298,9 @@ public class ServerService extends Service {
                     Intent intent = new Intent(getApplicationContext(), ModeratorScoreboardActivity.class);
                     startActivity(intent);
                 }
-                //TODO return "AnswerReceived" + Player (has points and ranking)
+                //TODO return "AnswerReceived/" + Player (has points and ranking)
 
-                return new Response("<AnswerReceived>");
+                return new Response("AnswerReceived/");
             }
 
             return new Response(null);
