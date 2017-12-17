@@ -61,7 +61,7 @@ public class QuestionFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 timer.onFinish();
-                listener.submitAnswer(getAnswer(), correctAnswer, remaining);
+
             }
         });
 
