@@ -226,15 +226,19 @@ public class QuizClient extends Thread {
                     case 1:
                         //red
                         corrAns = QuestionFragment.Answer.RED;
+                        break;
                     case 2:
                         //yellow
                         corrAns = QuestionFragment.Answer.YELLOW;
+                        break;
                     case 3:
                         //green
                         corrAns = QuestionFragment.Answer.GREEN;
+                        break;
                     case 4:
                         //blue
                         corrAns = QuestionFragment.Answer.BLUE;
+                        break;
                     default:
                         corrAns = QuestionFragment.Answer.NONE;
 
@@ -273,8 +277,7 @@ public class QuizClient extends Thread {
 
                         StringTokenizer st = new StringTokenizer(response, "/");
                         //expected response
-                        if (st.nextToken().equals("AnswerReceived\n")) {
-
+                        if (st.nextToken().equals("AnswerReceived")) {
 
                             player = new Gson().fromJson(st.nextToken(), Player.class);
                             points = player.getScore();
