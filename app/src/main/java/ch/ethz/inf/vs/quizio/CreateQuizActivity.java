@@ -35,6 +35,22 @@ public class CreateQuizActivity extends AppCompatActivity {
     SharedPreferences.Editor prefsEditor;
     Gson gson;
 
+    @Override
+    public void onResume() {
+        super.onResume();  // Always call the superclass method first
+        ListView listView = (ListView) findViewById(R.id.questions);
+        ArrayAdapter<String> adapter =         new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1, gson.fromJson(mPrefs.getString("quiz", ""), Quiz.class).getQuestionList());
+        adapter.clear();
+        adapter.addAll(gson.fromJson(mPrefs.getString("quiz", ""), Quiz.class).getQuestionList());
+        adapter.notifyDataSetChanged();
+        listView.setAdapter(adapter);
+
+
+
+
+    }
+
+
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_quiz);
@@ -59,14 +75,15 @@ public class CreateQuizActivity extends AppCompatActivity {
         ListView listView = (ListView) findViewById(R.id.questions);
 
         //TODO check if quiz is empty otherwise you get error trying to access it
-        ArrayAdapter<Question> adapter = new ArrayAdapter<Question>(this, android.R.layout.activity_list_item, gson.fromJson(mPrefs.getString("quiz", ""), Quiz.class).questionList);
-        listView.setAdapter(adapter);
+
+
+
 
         //TODO add delete old version of QUESTION
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener(){
             @Override
             public void onItemClick(AdapterView<?>adapter, View v, int position, long id){
-                int questionNr = (int)adapter.getItemIdAtPosition(position);
+                Integer questionNr = (int)adapter.getItemIdAtPosition(position);
 
                 Intent intent = new Intent(CreateQuizActivity.this,CreateQuestionActivity.class);
                 intent.putExtra("questionNr", questionNr);
@@ -93,8 +110,6 @@ public class CreateQuizActivity extends AppCompatActivity {
 
                 Intent intent = new Intent(CreateQuizActivity.this,CreateQuestionActivity.class);
                 startActivity(intent);
-                question.setText(Integer.toString(gson.fromJson(mPrefs.getString("quiz", ""), Quiz.class).questionList.size()));
-                listView.addFooterView(question);
 
             }
 
