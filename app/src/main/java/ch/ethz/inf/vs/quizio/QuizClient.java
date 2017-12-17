@@ -23,6 +23,7 @@ import java.net.Socket;
 import java.net.URL;
 import java.util.List;
 import java.util.StringTokenizer;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -140,7 +141,7 @@ public class QuizClient extends Thread {
                     PrintWriter pw = new PrintWriter(connection.getOutputStream());
                     JSONObject data = new JSONObject();
                     data.put("name",name);
-                    data.put("code",code);
+                    data.put("code",Integer.valueOf(code));
                     pw.print(data.toString());
 
 
@@ -199,6 +200,7 @@ public class QuizClient extends Thread {
                 catch (Exception e){
                     Log.d(TAG,":on join quiz communication");
                     e.printStackTrace();
+                    listener.onJoinResult(false,"Exception joining");
                 }
             }
         }).start();
@@ -210,80 +212,84 @@ public class QuizClient extends Thread {
 
     void submitAnswer(QuestionFragment.Answer ans,int CorrectAns, int timeRemaining) {
 
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
 
+                Log.d(TAG, String.format("Submitting answer: %s", ans.toString().toLowerCase()));
 
-        Log.d(TAG, String.format("Submitting answer: %s", ans.toString().toLowerCase()));
+                QuestionFragment.Answer corrAns;
+                switch (CorrectAns) {
+                    case 1:
+                        //red
+                        corrAns = QuestionFragment.Answer.RED;
+                    case 2:
+                        //yellow
+                        corrAns = QuestionFragment.Answer.YELLOW;
+                    case 3:
+                        //green
+                        corrAns = QuestionFragment.Answer.GREEN;
+                    case 4:
+                        //blue
+                        corrAns = QuestionFragment.Answer.BLUE;
+                    default:
+                        corrAns = QuestionFragment.Answer.NONE;
 
-        QuestionFragment.Answer corrAns;
-        switch (CorrectAns){
-            case 1:
-                //red
-                corrAns = QuestionFragment.Answer.RED;
-            case 2:
-                //yellow
-                corrAns = QuestionFragment.Answer.YELLOW;
-            case 3:
-                //green
-                corrAns = QuestionFragment.Answer.GREEN;
-            case 4:
-                //blue
-                corrAns = QuestionFragment.Answer.BLUE;
-            default:
-                corrAns = QuestionFragment.Answer.NONE;
-
-        }
-        boolean right = (corrAns.equals(ans));
-
-        //post message with boolean to server, expects points and rank back
-
-        try {
-            URL url = new URL("http://"+host+":"+port+"/submitAnswer");
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-            PrintWriter pw = new PrintWriter(connection.getOutputStream(),true);
-            connection.setRequestMethod("POST");
-
-            if(right){
-                points = points + 10 * timeRemaining;
-                player.setScore(points);
-            }
-            String Player = new Gson().toJson(player, ch.ethz.inf.vs.quizio.Player.class);
-            pw.print(Player);
-
-
-            int status = connection.getResponseCode();
-
-            if(status == 200) {
-
-                StringBuilder sb = new StringBuilder();
-                String line = "";
-                while ((line = in.readLine()) != null) {
-                    sb.append(line);
                 }
-                String response = sb.toString();
+                boolean right = (corrAns.equals(ans));
 
-                StringTokenizer st = new StringTokenizer(response,"/");
-                //expected response
-                if(st.nextToken().equals("AnswerReceived")) {
+                //post message with boolean to server, expects points and rank back
+
+                try {
+                    URL url = new URL("http://" + host + ":" + port + "/submitAnswer");
+                    HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                    BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                    PrintWriter pw = new PrintWriter(connection.getOutputStream(), true);
+                    connection.setRequestMethod("POST");
+
+                    if (right) {
+                        points = points + 10 * timeRemaining;
+                        player.setScore(points);
+                    }
+                    String Player = new Gson().toJson(player, ch.ethz.inf.vs.quizio.Player.class);
+                    pw.print(Player);
 
 
-                    player = new Gson().fromJson(st.nextToken(), Player.class);
-                    points = player.getScore();
-                    rank = player.getRank();
+                    int status = connection.getResponseCode();
 
-                    //forward to game activity
-                    listener.onResult(right, points, rank);
-                }else{
-                    Log.d(TAG,"server did not accept response");
+                    if (status == 200) {
+
+                        StringBuilder sb = new StringBuilder();
+                        String line = "";
+                        while ((line = in.readLine()) != null) {
+                            sb.append(line);
+                        }
+                        String response = sb.toString();
+
+                        StringTokenizer st = new StringTokenizer(response, "/");
+                        //expected response
+                        if (st.nextToken().equals("AnswerReceived")) {
+
+
+                            player = new Gson().fromJson(st.nextToken(), Player.class);
+                            points = player.getScore();
+                            rank = player.getRank();
+
+                            //forward to game activity
+                            listener.onResult(right, points, rank);
+                        } else {
+                            Log.d(TAG, "server did not accept response");
+                        }
+                    } else {
+                        Log.d(TAG, "Bad server response");
+                    }
+
+                } catch (Exception e) {
+                    Log.d(TAG, " on submitting answer");
+                    e.printStackTrace();
                 }
-            }else{
-                Log.d(TAG,"Bad server response");
             }
-
-        }catch (Exception e){
-            Log.d(TAG," on submitting answer");
-            e.printStackTrace();
-        }
+        }).start();
 
     }
 
@@ -298,141 +304,197 @@ public class QuizClient extends Thread {
     }
 
     private void getQuiz(){
-        try {
-            URL url = new URL("http://" + host + ":" + port + "/getQuiz");
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestMethod("GET");
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+
+                try {
+                    URL url = new URL("http://" + host + ":" + port + "/getQuiz");
+                    HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                    connection.setRequestMethod("GET");
 
 
-            BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-            int status = connection.getResponseCode();
-            if(status == 200) {
+                    BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                    int status = connection.getResponseCode();
+                    if (status == 200) {
 
-                StringBuilder sb = new StringBuilder();
-                String line = "";
-                while ((line = in.readLine()) != null) {
-                    sb.append(line + "\n");
+                        StringBuilder sb = new StringBuilder();
+                        String line = "";
+                        while ((line = in.readLine()) != null) {
+                            sb.append(line + "\n");
+                        }
+                        String response = sb.toString();
+
+                        quiz = new Gson().fromJson(response, Quiz.class);
+
+                    } else {
+                        Log.d(TAG, "bad server response");
+                    }
+
+                } catch (Exception e) {
+                    Log.d(TAG, "error on getQuiz communication");
+                    e.printStackTrace();
                 }
-                String response = sb.toString();
-
-                quiz = new Gson().fromJson(response,Quiz.class);
-
-            }else{
-                Log.d(TAG,"bad server response");
             }
-
-        }catch (Exception e){
-            Log.d(TAG,"error on getQuiz communication");
-            e.printStackTrace();
-        }
+        }).start();
     }
 
     private boolean pollNextQuestion(){
+        final boolean[] goNext = new boolean[1];
+        final CountDownLatch latch = new CountDownLatch(1);
 
-        try {
-            URL url = new URL("http://"+host+":"+port+"/isQuestionStarted");
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestMethod("GET");
+        Thread t = new Thread(new Runnable() {
+            @Override
+            public void run() {
 
-            BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-            int status = connection.getResponseCode();
-            if(status == 200) {
+                try {
+                    URL url = new URL("http://" + host + ":" + port + "/isQuestionStarted");
+                    HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                    connection.setRequestMethod("GET");
 
-                StringBuilder sb = new StringBuilder();
-                String line = "";
-                while ((line = in.readLine()) != null) {
-                    sb.append(line + "\n");
+                    BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                    int status = connection.getResponseCode();
+                    if (status == 200) {
+
+                        StringBuilder sb = new StringBuilder();
+                        String line = "";
+                        while ((line = in.readLine()) != null) {
+                            sb.append(line + "\n");
+                        }
+                        String response = sb.toString();
+
+
+                        if (response.equals("true")) {
+                            //go for next question
+                            goNext[0] = true;
+                            latch.countDown();
+                        } else {
+                            //wait
+                            goNext[0] = false;
+                            latch.countDown();
+                        }
+                    } else {
+                        Log.d(TAG, "bad server response");
+                    }
+
+                } catch (Exception e) {
+                    Log.d(TAG, "in pollNextQuestion");
+                    e.printStackTrace();
+                    goNext[0] = false;
+                    latch.countDown();
                 }
-                String response = sb.toString();
 
 
-
-
-                if (response.equals("true")) {
-                    //go for next question
-                    return true;
-                } else {
-                    //wait
-                    return false;
-                }
-            }else{
-                Log.d(TAG,"bad server response");
             }
-
+        });
+        t.start();
+        try {
+            latch.await();
         }catch (Exception e){
-            Log.d(TAG,"in pollNextQuestion");
+            Log.d(TAG,"on waiting for latch in poll next question");
             e.printStackTrace();
         }
 
-        return false;
+    return goNext[0];
     }
 
     public boolean tryReconnect(InetAddress host,int port){
         this.host = host;
         this.port = port;
 
-        try {
-            URL url = new URL("http://"+host+":"+port+"/resume");
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestMethod("POST");
+        final boolean[] reconnected = new boolean[1];
+        final CountDownLatch latch = new CountDownLatch(1);
 
-            BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-            PrintWriter pw = new PrintWriter(connection.getOutputStream(),true);
-
-            String Quiz = new Gson().toJson(quiz, ch.ethz.inf.vs.quizio.Quiz.class);
-            pw.print(Quiz);
-            StringBuilder sb = new StringBuilder();
-
-            String line = "";
-            while ((line = in.readLine())!= null){
-                sb.append(line+"\n");
-            }
-            String response = sb.toString();
-            StringTokenizer st = new StringTokenizer(response,"/");
-            if(response.equals("ResumeSucceeded")){
-                //server accepted quiz
-                startFromIthQuestion(Integer.valueOf(st.nextToken()));
-                return true;
-            }else{
-                Log.d(TAG,"reconnect failed");
-                return false;
-            }
+        Thread t = new Thread(new Runnable() {
+            @Override
+            public void run() {
 
 
+                try {
+                    URL url = new URL("http://" + host + ":" + port + "/resume");
+                    HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                    connection.setRequestMethod("POST");
+
+                    BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                    PrintWriter pw = new PrintWriter(connection.getOutputStream(), true);
+
+                    String Quiz = new Gson().toJson(quiz, ch.ethz.inf.vs.quizio.Quiz.class);
+                    pw.print(Quiz);
+                    StringBuilder sb = new StringBuilder();
+
+                    String line = "";
+                    while ((line = in.readLine()) != null) {
+                        sb.append(line + "\n");
+                    }
+                    String response = sb.toString();
+                    StringTokenizer st = new StringTokenizer(response, "/");
+                    if (response.equals("ResumeSucceeded")) {
+                        //server accepted quiz
+                        startFromIthQuestion(Integer.valueOf(st.nextToken()));
+                        reconnected[0] = true;
+                        latch.countDown();
+                    } else {
+                        Log.d(TAG, "reconnect failed");
+                        reconnected[0] = false;
+                        latch.countDown();
+                    }
 
 
+                } catch (Exception e) {
+                    Log.d(TAG, "error communicating in reconnect");
+                    e.printStackTrace();
+                    reconnected[0] = false;
+                    latch.countDown();
+                }
 
+
+            }});
+        t.start();
+        try{
+            latch.await();
         }catch (Exception e){
-            Log.d(TAG,"error communicating in reconnect");
+            Log.d(TAG,"on awaiting latch from reconnect thread");
             e.printStackTrace();
         }
 
-        return false;
+
+
+        return reconnected[0];
     }
 
 
     private void startFromIthQuestion(int i){
-        currentQuestion = i;
-        while(currentQuestion<NrQuestions){
-            while(!pollNextQuestion()){
-                try {
-                    sleep(2000);
-                }catch (InterruptedException e){
-                    Log.d(TAG,"interrupted while polling server for go on "+i+" th question");
-                    e.printStackTrace();
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+
+                currentQuestion = i;
+                while (currentQuestion < NrQuestions) {
+                    while (!pollNextQuestion()) {
+                        try {
+                            sleep(2000);
+                        } catch (InterruptedException e) {
+                            Log.d(TAG, "interrupted while polling server for go on " + i + " th question");
+                            e.printStackTrace();
+                        }
+                    }
+                    //as soon as we have the go, inform the listener to start the next question
+                    currentQuestion++;
+                    listener.onStartQuestion(quiz.questionList.get(i));
                 }
+                try {
+                    sleep(10000);
+                } catch (InterruptedException e) {
+                    Log.d(TAG, "End of Game: Interrupted on waiting to go to main activity");
+                }
+                listener.goHome();
+
             }
-            //as soon as we have the go, inform the listener to start the next question
-            currentQuestion++;
-            listener.onStartQuestion(quiz.questionList.get(i));
-        }
-        try{
-            sleep(10000);
-        }catch (InterruptedException e){
-            Log.d(TAG, "End of Game: Interrupted on waiting to go to main activity");
-        }
-        listener.goHome();
+        }).start();
 
     }
+
 
 }
