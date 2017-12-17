@@ -166,7 +166,7 @@ public class ServerService extends Service {
         int numQuestions = 0;
         int numPlayers = 0;
         Quiz quiz;
-        boolean hasQuestionStarted = true;
+        boolean hasQuestionStarted = false;
         SharedPreferences mPrefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         SharedPreferences.Editor prefsEditor = mPrefs.edit();
         Gson gson = new Gson();

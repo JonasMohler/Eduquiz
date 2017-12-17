@@ -272,7 +272,7 @@ public class QuizClient extends Thread {
 
                         StringTokenizer st = new StringTokenizer(response, "/");
                         //expected response
-                        if (st.nextToken().equals("AnswerReceived")) {
+                        if (st.nextToken().equals("AnswerReceived\n")) {
 
 
                             player = new Gson().fromJson(st.nextToken(), Player.class);
@@ -434,7 +434,7 @@ public class QuizClient extends Thread {
                     }
                     String response = sb.toString();
                     StringTokenizer st = new StringTokenizer(response, "/");
-                    if (response.equals("ResumeSucceeded")) {
+                    if (response.equals("ResumeSucceeded\n")) {
                         //server accepted quiz
                         startFromIthQuestion(Integer.valueOf(st.nextToken()));
                         reconnected[0] = true;
