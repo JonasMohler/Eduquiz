@@ -133,17 +133,19 @@ public class QuizClient extends Thread {
             public void run() {
                 try{
 
-
-                    URL url = new URL("http:/"+host+":"+8080+"/?join" );
+                    JSONObject data = new JSONObject();
+                    data.put("name",name);
+                    data.put("code",Integer.valueOf(code));
+                    URL url = new URL("http:/"+host+":"+8080+"/?join=" + data.toString());
                     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                     connection.setRequestMethod("POST");
-
+                    /*
                     PrintWriter pw = new PrintWriter(connection.getOutputStream());
                     JSONObject data = new JSONObject();
                     data.put("name",name);
                     data.put("code",Integer.valueOf(code));
                     pw.print(data.toString());
-
+                    */
 
                     BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
 
@@ -171,7 +173,7 @@ public class QuizClient extends Thread {
                         if (st.hasMoreElements()) {
                             if ((message = st.nextToken()).equals("JoinFailed")) {
                                 //join was unsuccessful, handle the problem
-                                if ((error = st.nextToken()).equals("wrongCode")) {
+                                if ((error = st.nextToken()).equals("wrongCode\n")) {
                                     //prompt user to input right code
                                     listener.onJoinResult(false, error);
                                 } else {
@@ -179,7 +181,7 @@ public class QuizClient extends Thread {
                                     listener.onJoinResult(false, error);
                                 }
                                 //Success
-                            } else if (message.equals("JoinSuccessful")) {
+                            } else if (message.equals("JoinSuccessful\n")) {
 
                                 //go forward in game
                                 player = new Player(name);
@@ -241,18 +243,20 @@ public class QuizClient extends Thread {
                 //post message with boolean to server, expects points and rank back
 
                 try {
-                    URL url = new URL("http://" + host + ":" + port + "/submitAnswer");
-                    HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-                    BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-                    PrintWriter pw = new PrintWriter(connection.getOutputStream(), true);
-                    connection.setRequestMethod("POST");
-
                     if (right) {
                         points = points + 10 * timeRemaining;
                         player.setScore(points);
                     }
                     String Player = new Gson().toJson(player, ch.ethz.inf.vs.quizio.Player.class);
-                    pw.print(Player);
+                    //pw.print(Player);
+
+                    URL url = new URL("http:/" + host + ":" + port + "/?submitAnswer=" + Player);
+                    HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                    BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                    //PrintWriter pw = new PrintWriter(connection.getOutputStream(), true);
+                    connection.setRequestMethod("POST");
+
+
 
 
                     int status = connection.getResponseCode();
@@ -310,7 +314,7 @@ public class QuizClient extends Thread {
             public void run() {
 
                 try {
-                    URL url = new URL("http://" + host + ":" + port + "/getQuiz");
+                    URL url = new URL("http:/" + host + ":" + port + "/?getQuiz");
                     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                     connection.setRequestMethod("GET");
 
@@ -349,7 +353,7 @@ public class QuizClient extends Thread {
             public void run() {
 
                 try {
-                    URL url = new URL("http://" + host + ":" + port + "/isQuestionStarted");
+                    URL url = new URL("http:/" + host + ":" + port + "/?isQuestionStarted");
                     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                     connection.setRequestMethod("GET");
 
@@ -412,15 +416,16 @@ public class QuizClient extends Thread {
 
 
                 try {
-                    URL url = new URL("http://" + host + ":" + port + "/resume");
+                    String Quiz = new Gson().toJson(quiz, ch.ethz.inf.vs.quizio.Quiz.class);
+                    //pw.print(Quiz);
+                    URL url = new URL("http:/" + host + ":" + 8080 + "/?resume=" + Quiz);
                     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                     connection.setRequestMethod("POST");
 
                     BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-                    PrintWriter pw = new PrintWriter(connection.getOutputStream(), true);
+                    //PrintWriter pw = new PrintWriter(connection.getOutputStream(), true);
 
-                    String Quiz = new Gson().toJson(quiz, ch.ethz.inf.vs.quizio.Quiz.class);
-                    pw.print(Quiz);
+
                     StringBuilder sb = new StringBuilder();
 
                     String line = "";

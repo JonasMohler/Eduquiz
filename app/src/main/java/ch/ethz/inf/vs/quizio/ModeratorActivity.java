@@ -50,6 +50,8 @@ public class ModeratorActivity extends AppCompatActivity {
         Runnable runnableCode = new Runnable() {
             @Override
             public void run() {
+                String json = mPrefs.getString("quiz", "");
+                quiz = gson.fromJson(json, Quiz.class);
                 playersJoined.setText(quiz.getAllPlayerNamesString());
                 handler.postDelayed(this, 200);
             }

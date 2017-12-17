@@ -259,7 +259,7 @@ public class ServerService extends Service {
                     if(quiz.playerList.contains(new Player(joinData.getString("name")))){
                         return new Response("JoinFailed/Choose a different name");
                     }else if(quiz.gameCode != joinData.getInt("code")){
-                        return new Response("JoinFailed/Invalid Code");
+                        return new Response("JoinFailed/wrongCode");
                     }else {
 
                         numPlayers += 1;
@@ -270,7 +270,7 @@ public class ServerService extends Service {
                         prefsEditor.putString("quiz", quizUpdated);
                         prefsEditor.commit();
 
-                        return new Response("JoinSucceeded");
+                        return new Response("JoinSuccessful");
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();}
