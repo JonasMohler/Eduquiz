@@ -87,7 +87,7 @@ public class GameActivity
 
         getSupportFragmentManager().beginTransaction()
                 .setCustomAnimations(android.R.anim.slide_in_left, android.R.anim.slide_out_right)
-                .replace(R.id.game_content, QuestionFragment.newInstance(15,question))
+                .replace(R.id.game_content, QuestionFragment.newInstance(10,question))
                 .commit();
     }
 
