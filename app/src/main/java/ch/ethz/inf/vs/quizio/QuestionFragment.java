@@ -70,6 +70,7 @@ public class QuestionFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 timer.onFinish();
+                timer = null;
 
             }
         });

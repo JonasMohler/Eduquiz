@@ -95,7 +95,7 @@ public class QuizClient extends Thread {
 
             while(!pollNextQuestion()){
                 try {
-                    sleep(2000);
+                    sleep(250);
                 }catch (InterruptedException e){
                     Log.d(TAG,"interrupted while polling server for go on "+i+" th question");
                     e.printStackTrace();
@@ -229,7 +229,7 @@ public class QuizClient extends Thread {
                 Log.d(TAG, String.format("Submitting answer: %s", ans.toString().toLowerCase()));
 
                 QuestionFragment.Answer corrAns;
-                switch (CorrectAns) {
+                switch (CorrectAns+1) {
                     case 1:
                         //red
                         corrAns = QuestionFragment.Answer.RED;

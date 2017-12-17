@@ -322,6 +322,8 @@ public class ServerService extends Service {
                 prefsEditor.putString("quiz", quizUpdated);
                 prefsEditor.commit();
 
+
+                /*
                 numAnswersSubmitted += 1;
                 if (numAnswersSubmitted == numPlayers) {
                     numAnswersSubmitted = 0;
@@ -336,7 +338,7 @@ public class ServerService extends Service {
                     Intent intent = new Intent(getApplicationContext(), ModeratorScoreboardActivity.class);
                     startActivity(intent);
                 }
-
+*/
 
                 return new Response("AnswerReceived/"+playerUpdatedRank+"/");
             }

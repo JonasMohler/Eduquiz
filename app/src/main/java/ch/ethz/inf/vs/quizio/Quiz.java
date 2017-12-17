@@ -164,7 +164,8 @@ public class Quiz {
         String result = "";
         Integer n = playerList.size();
         for(Integer i = 0;i<n;i++){
-            result = result + i.toString() + ". "  + playerList.get(i).name
+            Integer place = i + 1;
+            result = result + place.toString() + ". "  + playerList.get(i).name
                     +  " with " + playerList.get(i).getScore() + " Points" +  System.lineSeparator();
         }
         /*

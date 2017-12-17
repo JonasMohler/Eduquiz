@@ -59,7 +59,7 @@ public class CreateQuestionActivity extends AppCompatActivity {
                     Intent intent = getIntent();
                     int id = intent.getIntExtra("questionNr",-1);
 
-                    Question question1 = new Question(question.getText().toString(), answer1.getText().toString(), answer2.getText().toString(), answer3.getText().toString(), answer4.getText().toString(), CorAns - 1);
+                    Question question1 = new Question(question.getText().toString(), answer1.getText().toString(), answer2.getText().toString(), answer3.getText().toString(), answer4.getText().toString(), CorAns);
 
                     Gson gson = new Gson();
                     SharedPreferences.Editor prefsEditor = mPrefs.edit();
@@ -77,7 +77,7 @@ public class CreateQuestionActivity extends AppCompatActivity {
                     Integer CorAns = Integer.valueOf(correctAnswer.getText().toString());
 
 
-                    Question question1 = new Question(question.getText().toString(), answer1.getText().toString(), answer2.getText().toString(), answer3.getText().toString(), answer4.getText().toString(), CorAns - 1);
+                    Question question1 = new Question(question.getText().toString(), answer1.getText().toString(), answer2.getText().toString(), answer3.getText().toString(), answer4.getText().toString(), CorAns);
 
                     Gson gson = new Gson();
                     SharedPreferences.Editor prefsEditor = mPrefs.edit();
