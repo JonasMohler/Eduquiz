@@ -29,7 +29,7 @@ public class QuestionFragment extends Fragment {
 
     private Listener listener;
     private RadioGroup answerGroup;
-    private int remaining;
+    private int remaining,remainingOnClick;
     int correctAnswer;
     private CountDownTimer timer;
 
@@ -56,6 +56,15 @@ public class QuestionFragment extends Fragment {
         TextView countdown = (TextView) view.findViewById(R.id.countdown);
         ProgressBar timeRemaining = (ProgressBar) view.findViewById(R.id.time_remaining);
         answerGroup = (RadioGroup) view.findViewById(R.id.answer_group);
+        /*
+        answerGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup group, int checkedId) {
+                remainingOnClicked = remaining;
+            }
+        });
+        */
+
         Button button = (Button) view.findViewById(R.id.commitAnswerButton);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -89,9 +98,12 @@ public class QuestionFragment extends Fragment {
                 for (View rb : answerGroup.getTouchables())
                     rb.setEnabled(false);
                 answerGroup.setEnabled(false);
+                listener.submitAnswer(getAnswer(),correctAnswer,remaining/1000);
+                /*
+                listener.submitAnswer(getAnswer(),correctAnswer,remainingOnClick/1000);
+                */
 
-                listener.submitAnswer(getAnswer(),correctAnswer,0);
-
+                cancel();
             }
         }.start();
 

@@ -253,12 +253,12 @@ public class QuizClient extends Thread {
                 boolean right = (corrAns.equals(ans));
 
                 //post message with boolean to server, expects points and rank back
-
+                if (right) {
+                    points = points + 10 * timeRemaining;
+                    player.setScore(points);
+                }
                 try {
-                    if (right) {
-                        points = points + 10 * timeRemaining;
-                        player.setScore(points);
-                    }
+
                     String Player = new Gson().toJson(player, ch.ethz.inf.vs.quizio.Player.class);
                     //pw.print(Player);
 
