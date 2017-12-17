@@ -265,7 +265,7 @@ public class ServerService extends Service {
                         numPlayers += 1;
                         String json = mPrefs.getString("quiz", "");
                         Quiz quiz = gson.fromJson(json, Quiz.class);
-                        quiz.PlayerJoins(new Player(parms.get("join")));
+                        quiz.PlayerJoins(new Player(joinData.getString("name")));
                         String quizUpdated = gson.toJson(quiz);
                         prefsEditor.putString("quiz", quizUpdated);
                         prefsEditor.commit();
@@ -303,6 +303,25 @@ public class ServerService extends Service {
                 * player contains a clock now(whatever you want to do with that)
                 * */
 
+
+                Player thePlayer = gson.fromJson(parms.get("submitAnswer"), Player.class);
+                String jsonQuiz = mPrefs.getString("quiz", "");
+                quiz = gson.fromJson(jsonQuiz, Quiz.class);
+                ArrayList<Player> playersList = quiz.playerList;
+                for(Integer i = 0;i<playersList.size();i++){
+                    if (playersList.get(i).name.equals(thePlayer.name)) {
+
+                        playersList.set(i,thePlayer);
+                    }
+                }
+                quiz.playerList = playersList;
+                thePlayer = quiz.getRankForPlayer(thePlayer);
+                String playerUpdatedRank = gson.toJson(thePlayer);
+
+                String quizUpdated = gson.toJson(quiz);
+                prefsEditor.putString("quiz", quizUpdated);
+                prefsEditor.commit();
+
                 numAnswersSubmitted += 1;
                 if (numAnswersSubmitted == numPlayers) {
                     numAnswersSubmitted = 0;
@@ -318,24 +337,8 @@ public class ServerService extends Service {
                     startActivity(intent);
                 }
 
-                String json = mPrefs.getString("player", "");
-                Player thePlayer = gson.fromJson(json, Player.class);
 
-                ArrayList<Player> playersList = quiz.playerList;
-                for(Integer i = 0;i<playersList.size();i++){
-                    if (playersList.get(i).name == thePlayer.name) {
-                        playersList.set(i,thePlayer);
-                    }
-                }
-                quiz.playerList = playersList;
-                thePlayer = quiz.getRankForPlayer(thePlayer);
-
-                String quizUpdated = gson.toJson(quiz);
-                prefsEditor.putString("quiz", quizUpdated);
-                prefsEditor.commit();
-
-
-                return new Response("AnswerReceived/"+thePlayer+"/");
+                return new Response("AnswerReceived/"+playerUpdatedRank+"/");
             }
 
             return new Response(null);

@@ -35,7 +35,7 @@ public class ModeratorResultActivity extends AppCompatActivity {
                     String ip = android.text.format.Formatter.formatIpAddress(manager.getConnectionInfo().getIpAddress());
 
 
-                    URL url = new URL("http://" + ip +":8080/?startQuestion");
+                    URL url = new URL("http://localhost:8080/?startQuestion");
                     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                     connection.setRequestMethod("POST");
                     int status = connection.getResponseCode();
@@ -51,7 +51,7 @@ public class ModeratorResultActivity extends AppCompatActivity {
         String json = mPrefs.getString("quiz", "");
         Quiz quiz = gson.fromJson(json, Quiz.class);
 
-        Question question = quiz.getQuestion(quiz.currentQuestion - 1);
+        Question question = quiz.getQuestion(quiz.currentQuestion );
 
 
         TextView rank1 = (TextView) findViewById(R.id.rank1);

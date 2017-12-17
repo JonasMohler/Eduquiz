@@ -47,6 +47,13 @@ public class Quiz {
         }
     }
 
+    public ArrayList<String> getQuestionList() {
+        ArrayList<String> questions = new ArrayList<String>();
+        for (int n = 0; n<questionList.size();n++) {
+            questions.add(questionList.get(n).TheQuestion);
+        }
+        return questions;
+    }
 
 
     public void resumeQuiz(int currentQuestion, int gameCode,ArrayList<String> questions){
