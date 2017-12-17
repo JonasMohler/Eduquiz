@@ -13,6 +13,7 @@ import android.util.Log;
 import java.net.InetAddress;
 import android.net.nsd.NsdManager.DiscoveryListener;
 import android.net.nsd.NsdManager;
+import android.view.View;
 
 public class GameActivity
         extends AppCompatActivity
@@ -204,4 +205,5 @@ public class GameActivity
             }
         };
     }
+
 }

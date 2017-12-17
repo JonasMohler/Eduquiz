@@ -2,12 +2,14 @@ package ch.ethz.inf.vs.quizio;
 
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.RadioGroup;
 import android.widget.TextView;
@@ -53,8 +55,16 @@ public class QuestionFragment extends Fragment {
         TextView countdown = (TextView) view.findViewById(R.id.countdown);
         ProgressBar timeRemaining = (ProgressBar) view.findViewById(R.id.time_remaining);
         answerGroup = (RadioGroup) view.findViewById(R.id.answer_group);
+        Button button = (Button) view.findViewById(R.id.commitAnswerButton);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                listener.submitAnswer(getAnswer(), correctAnswer, remaining);
+            }
+        });
 
-        Bundle args = getArguments();
+
+            Bundle args = getArguments();
         correctAnswer = args.getInt(KEY_CORRECT);
         if (args == null) throw new RuntimeException("QuestionFragment: No args found");
 
@@ -105,7 +115,4 @@ public class QuestionFragment extends Fragment {
                 return Answer.NONE;
         }
     }
-   public void onCommitAnswer(View v){
-        listener.submitAnswer(getAnswer(),correctAnswer,remaining);
-   }
 }

@@ -53,6 +53,7 @@ public class QuizClient extends Thread {
     private int currentQuestion = 0;
     private Quiz quiz;
     private Player player;
+    public  int timeRemaining;
 
 
     QuizClient(Listener listener) {
