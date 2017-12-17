@@ -247,7 +247,7 @@ public class ServerService extends Service {
 
                     if(numRejoinedPlayers == numPlayers) {
                         startNextQuestion();
-                        return new Response("ResumeSucceeded/"+quiz.currentQuestion);
+                        return new Response("ResumeSucceeded/"+quiz.currentQuestion+"/");
                     }
                     else return new Response("WaitingForOtherPlayersToJoin");
 
@@ -335,7 +335,7 @@ public class ServerService extends Service {
                 prefsEditor.commit();
 
 
-                return new Response("AnswerReceived/"+thePlayer);
+                return new Response("AnswerReceived/"+thePlayer+"/");
             }
 
             return new Response(null);
