@@ -31,6 +31,7 @@ public class QuestionFragment extends Fragment {
     private RadioGroup answerGroup;
     private int remaining;
     int correctAnswer;
+    private CountDownTimer timer;
 
     public QuestionFragment() { /* Required empty public constructor */ }
 
@@ -59,6 +60,7 @@ public class QuestionFragment extends Fragment {
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                timer.cancel();
                 listener.submitAnswer(getAnswer(), correctAnswer, remaining);
             }
         });
@@ -72,7 +74,7 @@ public class QuestionFragment extends Fragment {
 
         timeRemaining.setMax(max);
 
-        new CountDownTimer(max, 40) {
+        timer = new CountDownTimer(max, 40) {
 
             public void onTick(long remainingMillis) {
                 remaining = (int) remainingMillis;
