@@ -31,10 +31,10 @@ public class ModeratorResultActivity extends AppCompatActivity {
             public void onClick(View v) {
                 //TODO Call startNextQuestion in ServerService
                 try{
-
+                    /*
                     WifiManager manager = (WifiManager) getSystemService(WIFI_SERVICE);
                     String ip = android.text.format.Formatter.formatIpAddress(manager.getConnectionInfo().getIpAddress());
-
+                    */
 
                     URL url = new URL("http://localhost:8080/?startQuestion");
                     HttpURLConnection connection = (HttpURLConnection) url.openConnection();

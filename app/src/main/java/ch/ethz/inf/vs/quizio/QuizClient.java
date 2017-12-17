@@ -102,9 +102,16 @@ public class QuizClient extends Thread {
                 }
             }
             //as soon as we have the go, inform the listener to start the next question
-            currentQuestion++;
-            listener.onStartQuestion(quiz.questionList.get(i));
 
+            listener.onStartQuestion(quiz.questionList.get(i));
+            currentQuestion++;
+
+            try {
+                sleep(10000);
+            }catch (InterruptedException e){
+                Log.d(TAG,"interrupted while wating on "+i+"th question to finish");
+                e.printStackTrace();
+            }
         }
 
         try{
