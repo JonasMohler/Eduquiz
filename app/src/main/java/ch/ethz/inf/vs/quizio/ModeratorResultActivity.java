@@ -1,6 +1,7 @@
 package ch.ethz.inf.vs.quizio;
 
 import android.content.SharedPreferences;
+import android.content.pm.ActivityInfo;
 import android.net.wifi.WifiManager;
 import android.preference.PreferenceManager;
 import android.support.v4.content.ContextCompat;
@@ -23,7 +24,7 @@ public class ModeratorResultActivity extends AppCompatActivity {
         setContentView(R.layout.activity_moderator_result);
 
 
-
+        this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 
         final Button button = findViewById(R.id.nextbutton);
         button.setOnClickListener(new View.OnClickListener() {

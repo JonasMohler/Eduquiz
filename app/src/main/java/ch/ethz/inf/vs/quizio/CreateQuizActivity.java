@@ -66,6 +66,27 @@ public class CreateQuizActivity extends AppCompatActivity {
             prefsEditor.commit();
         }
 
+
+
+
+        //Create Sammple Quiz
+        Question question1 = new Question("Frage No. 1", "Antwort Möglichkeit 1", "Antwort Möglichkeit 2", "Antwort Möglichkeit 3", "Antwort Möglichkeit 4", 0);
+        Question question2 = new Question("Frage No. 2", "Antwort Möglichkeit 1", "Antwort Möglichkeit 2", "Antwort Möglichkeit 3", "Antwort Möglichkeit 4", 1);
+        Question question3 = new Question("Frage No. 3", "Antwort Möglichkeit 1", "Antwort Möglichkeit 2", "Antwort Möglichkeit 3", "Antwort Möglichkeit 4", 2);
+
+        Gson gson = new Gson();
+        SharedPreferences.Editor prefsEditor = mPrefs.edit();
+        String json = mPrefs.getString("quiz", "");
+        Quiz quiz = gson.fromJson(json, Quiz.class);
+        quiz.addQuestion(question1);
+        quiz.addQuestion(question2);
+        quiz.addQuestion(question3);
+        String quizUpdated = gson.toJson(quiz);
+        prefsEditor.putString("quiz", quizUpdated);
+        prefsEditor.commit();
+
+        //Finish
+
         startService(new Intent(getApplicationContext(), ServerService.class));
 
 
