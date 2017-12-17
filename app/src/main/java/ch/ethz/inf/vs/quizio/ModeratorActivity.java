@@ -67,11 +67,11 @@ public class ModeratorActivity extends AppCompatActivity {
                     public void run() {
                         try{
 
-                            WifiManager manager = (WifiManager) getSystemService(WIFI_SERVICE);
-                            String ip = android.text.format.Formatter.formatIpAddress(manager.getConnectionInfo().getIpAddress());
+                            //WifiManager manager = (WifiManager) getSystemService(WIFI_SERVICE);
+                            //String ip = android.text.format.Formatter.formatIpAddress(manager.getConnectionInfo().getIpAddress());
 
 
-                            URL url = new URL("http://" + ip +":8080/?startQuestion");
+                            URL url = new URL("http://localhost:8080/?startQuestion");
                             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                             connection.setRequestMethod("POST");
                             //BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));

@@ -278,7 +278,7 @@ public class ServerService extends Service {
 
 
             } else if (parms.containsKey("startQuestion")) {
-
+                hasQuestionStarted = true;
                 startNextQuestion();
                 return new Response("<QuestionStarted>" );
 

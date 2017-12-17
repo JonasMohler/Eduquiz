@@ -369,7 +369,7 @@ public class QuizClient extends Thread {
                         String response = sb.toString();
 
 
-                        if (response.equals("true")) {
+                        if (response.equals("true\n")) {
                             //go for next question
                             goNext[0] = true;
                             latch.countDown();
