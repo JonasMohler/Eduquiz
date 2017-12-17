@@ -34,6 +34,7 @@ public class ModeratorScoreboardActivity extends AppCompatActivity {
         final Button button = findViewById(R.id.button2);
         button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
+                stopService(new Intent(getApplicationContext(),ServerService.class));
                 Intent intent = new Intent(getApplicationContext(), MainActivity.class);
                 startActivity(intent);
             }
