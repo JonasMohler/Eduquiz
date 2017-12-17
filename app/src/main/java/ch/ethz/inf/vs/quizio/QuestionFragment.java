@@ -60,7 +60,7 @@ public class QuestionFragment extends Fragment {
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                timer.cancel();
+                timer.onFinish();
                 listener.submitAnswer(getAnswer(), correctAnswer, remaining);
             }
         });
